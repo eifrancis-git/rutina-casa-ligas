@@ -1,0 +1,2589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador Interactivo de Entrenamiento en Casa con Ligas (60 Min)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    .band-chip {
+      transition: all 0.18s ease;
+    }
+    .band-chip:hover {
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Header -->
+  <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-extrabold text-lg">
+          60'
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white leading-tight">
+            Plan Interactivo en Casa con Ligas
+          </h1>
+          <p class="text-xs text-slate-400">
+            1.57 m • 90 kg • Cero Impacto Articular • Ligas Tubulares (10–50 lb) y CrossFit (15–125 lb)
+          </p>
+        </div>
+      </div>
+
+      <!-- Week Progression & Timers -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Week Selector -->
+        <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+          <span class="text-xs text-slate-400 px-2 font-medium hidden md:inline">Progresión:</span>
+          <button id="week-btn-1" data-week="1" class="week-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 text-white transition">Sem 1</button>
+          <button id="week-btn-2" data-week="2" class="week-btn px-2.5 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">Sem 2</button>
+          <button id="week-btn-3" data-week="3" class="week-btn px-2.5 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">Sem 3</button>
+          <button id="week-btn-4" data-week="4" class="week-btn px-2.5 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">Sem 4</button>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="btn-sound-toggle" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-300 flex items-center gap-1.5 transition" title="Activar/Desactivar sonido del temporizador">
+          <span id="sound-icon">🔔</span>
+          <span id="sound-label" class="hidden sm:inline">Sonido ON</span>
+        </button>
+
+        <!-- Global Session Timer -->
+        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 gap-2">
+          <div class="text-xs">
+            <span class="text-slate-400 hidden sm:inline">Sesión: </span>
+            <span id="session-timer-display" class="font-mono font-bold text-emerald-400 text-sm">60:00</span>
+          </div>
+          <button id="btn-session-timer" class="px-2 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition">
+            Iniciar
+          </button>
+          <button id="btn-session-reset" class="px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs transition" title="Reiniciar 60 min">
+            ↺
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 pb-2 overflow-x-auto custom-scroll">
+      <div class="flex items-center gap-1.5 min-w-max" id="day-tabs-container">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-5 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Day Overview & Exercise List (5 cols on lg) -->
+    <section class="lg:col-span-5 flex flex-col gap-4">
+      <!-- Day Summary Banner -->
+      <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div>
+            <span id="day-badge" class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1">
+              Lunes • Día 1
+            </span>
+            <h2 id="day-title" class="text-lg font-extrabold text-white">
+              Pierna A: Cuádriceps, Aductores y Core
+            </h2>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-xs text-slate-400">Progreso del Día</div>
+            <div id="day-progress-text" class="text-sm font-bold text-emerald-400">0 / 6 ejercicios</div>
+          </div>
+        </div>
+        <p id="day-focus" class="text-xs text-slate-300 leading-relaxed mb-3"></p>
+
+        <!-- 60-Min Structure Pills -->
+        <div class="grid grid-cols-4 gap-1.5 text-center bg-slate-900/70 p-2 rounded-xl border border-slate-800">
+          <div class="p-1.5 rounded-lg bg-slate-800/80">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">1. Activación</div>
+            <div class="text-xs font-bold text-amber-400">8 min</div>
+          </div>
+          <div class="p-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/30">
+            <div class="text-[10px] text-emerald-300 uppercase font-semibold">2. Fuerza</div>
+            <div class="text-xs font-bold text-emerald-400">40 min</div>
+          </div>
+          <div class="p-1.5 rounded-lg bg-slate-800/80">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">3. Metabólico</div>
+            <div class="text-xs font-bold text-sky-400">7 min</div>
+          </div>
+          <div class="p-1.5 rounded-lg bg-slate-800/80">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">4. Calma</div>
+            <div class="text-xs font-bold text-purple-400">5 min</div>
+          </div>
+        </div>
+
+        <!-- Warmup collapsible/box -->
+        <div class="mt-3 pt-3 border-t border-slate-700/70 flex items-start gap-2 text-xs text-slate-300">
+          <span class="text-amber-400 font-bold shrink-0">🔥 Calentamiento (8 min):</span>
+          <span id="day-warmup"></span>
+        </div>
+      </div>
+
+      <!-- Week Adaptation Banner -->
+      <div id="week-banner" class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-3.5 py-2.5 text-xs flex items-center justify-between gap-2">
+        <div>
+          <span id="week-title" class="font-bold text-emerald-300">Semana 1 (Readaptación Neuromuscular • RIR 3):</span>
+          <span id="week-desc" class="text-slate-300 ml-1">Realiza 3 series controladas dejando 3 repeticiones en reserva.</span>
+        </div>
+      </div>
+
+      <!-- Exercise Cards List -->
+      <div class="flex flex-col gap-2.5" id="exercise-list-container">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Metabolic Finisher Card -->
+      <div class="bg-slate-800/90 border border-sky-500/30 rounded-2xl p-4 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-[11px] font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              Bloque Metabólico • 7 Min
+            </span>
+            <h3 class="text-sm font-bold text-white">Circuito Sin Impacto Articular</h3>
+          </div>
+          <!-- Finisher Interval Timer -->
+          <div class="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700">
+            <span id="finisher-phase-badge" class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300">40s Trabajo</span>
+            <span id="finisher-timer-display" class="font-mono text-sm font-bold text-white">00:40</span>
+            <button id="btn-finisher-toggle" class="px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold transition">
+              Iniciar
+            </button>
+            <button id="btn-finisher-reset" class="px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs transition">
+              ↺
+            </button>
+          </div>
+        </div>
+        <p id="day-finisher" class="text-xs text-slate-300 leading-relaxed"></p>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: Interactive Biomechanical Exercise Visualizer (7 cols on lg) -->
+    <section class="lg:col-span-7 flex flex-col gap-4">
+      <div class="bg-slate-800/95 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl sticky top-28">
+        
+        <!-- Active Exercise Title & Anchor Badge -->
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span id="viz-ex-number" class="px-2 py-0.5 text-xs font-extrabold rounded bg-emerald-500 text-slate-950">
+                Ejercicio 1
+              </span>
+              <span id="viz-anchor-badge" class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-700 text-slate-200 border border-slate-600">
+                ⚓ Anclaje: Pisando la banda (Suelo)
+              </span>
+            </div>
+            <h2 id="viz-ex-name" class="text-xl font-extrabold text-white">
+              Sentadilla Frontal con Banda (Front Squat)
+            </h2>
+          </div>
+
+          <!-- Rest Timer Widget -->
+          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700 px-3 py-1.5 rounded-xl">
+            <div class="text-right">
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Descanso Serie</div>
+              <div id="rest-timer-display" class="font-mono text-base font-extrabold text-amber-400 leading-none">01:00</div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex gap-1">
+                <button id="btn-rest-60" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[11px] font-bold transition">
+                  60s
+                </button>
+                <button id="btn-rest-75" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[11px] font-bold transition">
+                  75s
+                </button>
+              </div>
+              <button id="btn-rest-stop" class="px-2 py-0.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 text-[10px] font-semibold transition">
+                Detener
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE BIOMECHANICAL ANIMATION CANVAS -->
+        <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner">
+          <canvas id="biomech-canvas" width="760" height="400" class="w-full h-auto block"></canvas>
+
+          <!-- Top-Left Overlay: Tempo 3-1-1 Phase Indicator -->
+          <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-2 pointer-events-none">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">
+              Fase de Movimiento (Tempo 3-1-1)
+            </div>
+            <div id="hud-phase-name" class="text-xs sm:text-sm font-extrabold text-emerald-400">
+              CONCÉNTRICA (1s) — Supera la resistencia
+            </div>
+            <div class="w-44 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+              <div id="hud-phase-bar" class="h-full bg-emerald-400 transition-all duration-75" style="width: 50%"></div>
+            </div>
+          </div>
+
+          <!-- Top-Right Overlay: Live Tension Gauge -->
+          <div class="absolute top-3 right-3 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-2 text-right pointer-events-none">
+            <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+              Tensión Instantánea
+            </div>
+            <div id="hud-tension-value" class="text-base sm:text-lg font-mono font-extrabold text-white">
+              65 lb <span class="text-xs text-slate-400 font-normal">(29.5 kg)</span>
+            </div>
+            <div id="hud-band-summary" class="text-[11px] text-emerald-400 font-medium">
+              CrossFit 40–90 lb
+            </div>
+          </div>
+        </div>
+
+        <!-- Animation Playback & Scrubber Controls -->
+        <div class="mt-3 bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="btn-anim-toggle" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition">
+              <span id="anim-play-icon">⏸</span>
+              <span id="anim-play-text">Pausar</span>
+            </button>
+            <button id="btn-speed-slow" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition">
+              0.5x Técnica
+            </button>
+            <button id="btn-speed-normal" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition">
+              1.0x Tempo Real
+            </button>
+          </div>
+
+          <!-- Manual Range Scrubber -->
+          <div class="flex items-center gap-2 flex-1 min-w-[180px] max-w-xs">
+            <span class="text-[11px] text-slate-400 whitespace-nowrap">Recorrido:</span>
+            <input id="rom-slider" type="range" min="0" max="100" value="0" class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+            <span id="rom-pct-label" class="text-xs font-mono text-slate-300 w-9 text-right">0%</span>
+          </div>
+        </div>
+
+        <!-- Interactive Equipment Combinator (Tus Ligas) -->
+        <div class="mt-4 bg-slate-900/70 border border-slate-800 rounded-xl p-3.5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                🎛️ Simulador de Carga con tus Ligas (Haz clic para combinar)
+              </h3>
+              <p class="text-[11px] text-slate-400">
+                Recomendado para este ejercicio: <strong id="viz-rec-band" class="text-emerald-400">CrossFit 40-90 lb</strong>
+              </p>
+            </div>
+            <button id="btn-reset-bands" class="text-[11px] text-emerald-400 hover:text-emerald-300 underline font-medium">
+              Restaurar liga sugerida
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Tubular Bands -->
+            <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80">
+              <div class="text-[11px] font-semibold text-slate-400 mb-1.5 flex justify-between">
+                <span>Ligas Tubulares (Combinables en mosquetón)</span>
+                <span class="text-slate-500">Máx 150 lb</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="tubular-bands-container">
+                <button data-band-type="tubular" data-band-id="tub_10" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">10 lb</button>
+                <button data-band-type="tubular" data-band-id="tub_20" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">20 lb</button>
+                <button data-band-type="tubular" data-band-id="tub_30" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">30 lb</button>
+                <button data-band-type="tubular" data-band-id="tub_40" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">40 lb</button>
+                <button data-band-type="tubular" data-band-id="tub_50" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">50 lb</button>
+              </div>
+            </div>
+
+            <!-- CrossFit Loop Bands -->
+            <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80">
+              <div class="text-[11px] font-semibold text-slate-400 mb-1.5 flex justify-between">
+                <span>Ligas Cerradas CrossFit (Tensión Progresiva)</span>
+                <span class="text-slate-500">Power Bands</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="crossfit-bands-container">
+                <button data-band-type="crossfit" data-band-id="cf_15_35" class="band-chip px-2 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">15–35 lb</button>
+                <button data-band-type="crossfit" data-band-id="cf_35_50" class="band-chip px-2 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">35–50 lb</button>
+                <button data-band-type="crossfit" data-band-id="cf_40_90" class="band-chip px-2 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">40–90 lb</button>
+                <button data-band-type="crossfit" data-band-id="cf_50_125" class="band-chip px-2 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300">50–125 lb</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Coaching Cues & Joint Safety -->
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="md:col-span-2 bg-slate-900/70 border border-slate-800 rounded-xl p-3.5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1.5">
+              📐 Técnica Paso a Paso y Cuidado Articular (1.57 m / 90 kg)
+            </h4>
+            <p id="viz-ex-cues" class="text-xs text-slate-200 leading-relaxed mb-2"></p>
+            <div class="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1.5">
+              <strong>🛡️ Protección Articular:</strong> <span id="viz-ex-safety"></span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                🎯 Músculos Activos
+              </h4>
+              <div id="viz-muscles-list" class="flex flex-wrap gap-1.5 mb-3">
+                <!-- Muscle tags -->
+              </div>
+            </div>
+            <div class="border-t border-slate-800 pt-2.5">
+              <div class="text-[11px] text-slate-400">Prescripción Hoy:</div>
+              <div id="viz-prescription" class="text-sm font-extrabold text-white">4 series × 12–15 reps</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =========================================================================
+    // 1. BAND INVENTORY DATA
+    // =========================================================================
+    const BAND_CATALOG = {
+      tub_10: { id: 'tub_10', type: 'tubular', label: 'Tubular 10 lb', minLb: 6, maxLb: 10, color: '#38bdf8', width: 3 },
+      tub_20: { id: 'tub_20', type: 'tubular', label: 'Tubular 20 lb', minLb: 12, maxLb: 20, color: '#4ade80', width: 4 },
+      tub_30: { id: 'tub_30', type: 'tubular', label: 'Tubular 30 lb', minLb: 18, maxLb: 30, color: '#facc15', width: 5 },
+      tub_40: { id: 'tub_40', type: 'tubular', label: 'Tubular 40 lb', minLb: 24, maxLb: 40, color: '#fb923c', width: 6 },
+      tub_50: { id: 'tub_50', type: 'tubular', label: 'Tubular 50 lb', minLb: 30, maxLb: 50, color: '#f87171', width: 7 },
+      cf_15_35: { id: 'cf_15_35', type: 'crossfit', label: 'CrossFit 15–35 lb', minLb: 15, maxLb: 35, color: '#f43f5e', width: 5 },
+      cf_35_50: { id: 'cf_35_50', type: 'crossfit', label: 'CrossFit 35–50 lb', minLb: 35, maxLb: 50, color: '#10b981', width: 7 },
+      cf_40_90: { id: 'cf_40_90', type: 'crossfit', label: 'CrossFit 40–90 lb', minLb: 40, maxLb: 90, color: '#a855f7', width: 9 },
+      cf_50_125: { id: 'cf_50_125', type: 'crossfit', label: 'CrossFit 50–125 lb', minLb: 50, maxLb: 125, color: '#3b82f6', width: 12 }
+    };
+
+    // =========================================================================
+    // 2. COMPLETE 7-DAY WORKOUT DATABASE WITH KINEMATIC ANIMATION PATTERNS
+    // =========================================================================
+    const WORKOUT_DAYS = [
+      {
+        id: 'lunes',
+        shortName: 'Lun • Pierna A',
+        dayBadge: 'Lunes • Día 1',
+        title: 'Pierna A: Cuádriceps, Aductores y Core Antiflexión',
+        focus: 'Priorizamos patrones de rodilla dominantes sin impacto pliométrico, fortaleciendo el vasto interno (TKE) para dar máxima estabilidad a tus rodillas.',
+        warmup: '2 rondas de 10 sentadillas suaves tocando una silla detrás, 10 aperturas de cadera en suelo y 30 s de plancha apoyando manos en silla.',
+        finisher: '2 rondas continuas (40 s trabajo / 20 s descanso): (1) Marcha estática rápida con liga tubular de 20 lb en cintura, (2) Sentadilla isométrica en pared (Wall Sit) a 60°, (3) Crunch abdominal de pie con liga en anclaje alto.',
+        exercises: [
+          {
+            id: 'lun_1',
+            name: 'Sentadilla Frontal con Banda (Front Squat)',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['cf_40_90'],
+            recLabel: 'CrossFit 40–90 lb (o 35–50 lb en Sem 1)',
+            anchor: 'Pisando la banda con ambos pies',
+            muscles: ['Cuádriceps', 'Glúteo Mayor', 'Core'],
+            cues: 'Pisa la banda cerrada al ancho de los hombros y sube el bucle sobre los hombros cruzando los brazos al frente. Baja en 3 segundos llevando la cadera atrás y sube empujando el piso con toda la planta del pie.',
+            safety: 'Coloca una silla firme detrás para controlar la profundidad a 90° sin sobrecargar los tendones rotulianos.',
+            animType: 'squat_front'
+          },
+          {
+            id: 'lun_2',
+            name: 'Sentadilla Sumo con Tensión Inferior',
+            baseSets: 4,
+            reps: '15 reps',
+            recBands: ['cf_50_125'],
+            recLabel: 'CrossFit 50–125 lb',
+            anchor: 'Pisando ancho (45°) sujetando el centro',
+            muscles: ['Aductores', 'Cuádriceps', 'Glúteos'],
+            cues: 'Separa los pies más allá del ancho de hombros con puntas a 45°. Sujeta el centro de la banda con ambas manos con brazos extendidos entre las piernas. Mantén el pecho erguido al bajar y subir.',
+            safety: 'Alinea las rodillas siempre en la misma dirección que la punta de los pies; evita que colapsen hacia adentro.',
+            animType: 'squat_sumo'
+          },
+          {
+            id: 'lun_3',
+            name: 'Prensa Unilateral de Pierna en Suelo',
+            baseSets: 3,
+            reps: '12 reps / pierna',
+            recBands: ['cf_35_50'],
+            recLabel: 'CrossFit 35–50 lb (o Tubular 50 lb)',
+            anchor: 'Acostado boca arriba • Banda en mitad del pie',
+            muscles: ['Cuádriceps', 'Glúteo'],
+            cues: 'Acuéstate boca arriba sobre tu tapete, pasa la banda segura por el arco del pie y sujeta los extremos junto a tu cadera. Empuja el pie a 45° hacia adelante hasta casi extender la pierna.',
+            safety: 'Descarga el 100% del peso corporal de la columna lumbar mientras trabajas la pierna con alta tensión.',
+            animType: 'leg_press_floor'
+          },
+          {
+            id: 'lun_4',
+            name: 'Extensión Terminal de Rodilla (TKE)',
+            baseSets: 3,
+            reps: '15 reps / pierna',
+            recBands: ['cf_15_35'],
+            recLabel: 'CrossFit 15–35 lb',
+            anchor: 'Anclaje medio-bajo a la altura de la rodilla',
+            muscles: ['Vasto Interno (Cuádriceps)', 'Estabilizadores de Rodilla'],
+            cues: 'Pasa la banda por detrás de la corva de la rodilla mirando hacia el anclaje. Comienza con la rodilla ligeramente flexionada (30°) y extiéndela por completo apretando fuerte el muslo 2 segundos.',
+            safety: 'Ejercicio terapéutico clave para blindar la articulación de la rodilla y prevenir molestias al caminar.',
+            animType: 'tke_knee'
+          },
+          {
+            id: 'lun_5',
+            name: 'Desplante Estático Asistido (Split Squat)',
+            baseSets: 3,
+            reps: '10 reps / pierna',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Pisando la liga con el pie delantero',
+            muscles: ['Cuádriceps', 'Glúteo Medio'],
+            cues: 'Adelanta un pie pisando el centro de la liga tubular y deja el pie trasero en punta. Sube y baja verticalmente en el mismo lugar sin dar zancadas bruscas.',
+            safety: 'Puedes apoyar una mano libre sobre el respaldo de una silla o pared para garantizar equilibrio total.',
+            animType: 'split_squat'
+          },
+          {
+            id: 'lun_6',
+            name: 'Press Pallof Antirrotación de Core',
+            baseSets: 3,
+            reps: '12 reps / lado',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Anclaje medio en puerta (altura del pecho)',
+            muscles: ['Oblicuos', 'Transverso Abdominal'],
+            cues: 'Colócate de perfil al anclaje sujetando la liga contra el esternón. Extiende los brazos frente a ti en línea recta resistiendo la fuerza lateral que intenta girar tu tronco; sostén 2 segundos.',
+            safety: 'Fortalece la faja abdominal profunda sin flexionar ni comprimir los discos lumbares.',
+            animType: 'pallof_press'
+          }
+        ]
+      },
+      {
+        id: 'martes',
+        shortName: 'Mar • Empuje',
+        dayBadge: 'Martes • Día 2',
+        title: 'Tren Superior — Empuje (Pecho, Hombros y Tríceps)',
+        focus: 'Aprovechamos las ligas tubulares combinadas en anclaje de puerta y las bandas cerradas para estimular pectoral, deltoides y tríceps con tensión constante.',
+        warmup: 'Círculos escapulares, 15 dislocaciones suaves de hombro con banda CrossFit 15–35 lb y 12 rotaciones externas de manguito rotador con liga de 10 lb.',
+        finisher: 'Tábata de 3 rondas (30 s trabajo / 15 s descanso): (1) Boxeo rápido al frente con liga de 10–20 lb desde atrás, (2) Fondos asistidos apoyando manos en silla, (3) Plancha inclinada en silla tocando hombros.',
+        exercises: [
+          {
+            id: 'mar_1',
+            name: 'Press de Pecho de Pie (Anclaje Medio)',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['tub_40', 'tub_30'],
+            recLabel: 'Tubulares 40 + 30 lb combinadas (70 lb)',
+            anchor: 'Anclaje medio en puerta (a tu espalda)',
+            muscles: ['Pectoral Mayor', 'Deltoides Anterior', 'Tríceps'],
+            cues: 'De espaldas a la puerta, da un paso adelante con un pie para estabilizar la base. Empuja ambos manerales al frente a la altura del pecho juntando las manos al final sin encoger los hombros.',
+            safety: 'Mantén los codos a 45° respecto al torso (nunca abiertos a 90°) para cuidar el manguito rotador.',
+            animType: 'chest_press'
+          },
+          {
+            id: 'mar_2',
+            name: 'Press de Pecho en Suelo (Floor Press)',
+            baseSets: 4,
+            reps: '10–12 reps',
+            recBands: ['cf_35_50'],
+            recLabel: 'CrossFit 35–50 lb (o 40–90 lb)',
+            anchor: 'Acostado • Banda por detrás de la espalda alta',
+            muscles: ['Pectoral Mayor', 'Tríceps'],
+            cues: 'Pasa la banda de CrossFit por detrás de tus omóplatos y acuéstate boca arriba con las rodillas flexionadas. Empuja hacia el techo apretando el pecho arriba y baja hasta que los tríceps toquen el tapete.',
+            safety: 'El contacto de los codos con el suelo actúa como tope natural, evitando hiperextensión de la cápsula del hombro.',
+            animType: 'floor_press'
+          },
+          {
+            id: 'mar_3',
+            name: 'Aperturas Pectorales (Cruces en Puerta)',
+            baseSets: 3,
+            reps: '15 reps',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Anclaje medio-alto en puerta',
+            muscles: ['Pectoral Mayor (Fibras Internas)', 'Deltoides Anterior'],
+            cues: 'Con los brazos abiertos y codos ligeramente flexionados (como abrazando un tronco), junta las manos frente al esternón y sostén 1 segundo completo de contracción.',
+            safety: 'No lleves los codos demasiado atrás de la línea de tu espalda al regresar.',
+            animType: 'chest_fly'
+          },
+          {
+            id: 'mar_4',
+            name: 'Press Militar de Hombros de Pie',
+            baseSets: 4,
+            reps: '12 reps',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb (o CrossFit 15–35 lb)',
+            anchor: 'Pisando la liga con uno o ambos pies',
+            muscles: ['Deltoides Anterior', 'Deltoides Lateral', 'Tríceps'],
+            cues: 'Sujeta los manerales a la altura de las clavículas con los codos ligeramente adelantados (plano escapular de 30°). Empuja verticalmente sobre la cabeza sin arquear la cintura.',
+            safety: 'Aprieta los glúteos y el abdomen antes de empujar para blindar la columna lumbar.',
+            animType: 'overhead_press'
+          },
+          {
+            id: 'mar_5',
+            name: 'Elevaciones Laterales Controladas',
+            baseSets: 3,
+            reps: '15–18 reps',
+            recBands: ['tub_10'],
+            recLabel: 'Tubular 10 o 20 lb',
+            anchor: 'Pisando la liga con un pie',
+            muscles: ['Deltoides Lateral (Amplitud de Hombro)'],
+            cues: 'Pisa el centro de la liga de 10 o 20 lb, inclina el torso 10° al frente y eleva los brazos hacia los lados liderando con los codos hasta la altura de los hombros.',
+            safety: 'Detén la subida a los 90° (paralelo al piso) sin subir los trapecios hacia las orejas.',
+            animType: 'lateral_raise'
+          },
+          {
+            id: 'mar_6',
+            name: 'Extensión de Tríceps en Polea Alta',
+            baseSets: 4,
+            reps: '15 reps',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb',
+            anchor: 'Anclaje alto en puerta',
+            muscles: ['Tríceps Braquial (Las 3 cabezas)'],
+            cues: 'Frente a la puerta, pega los codos a tus costillas. Extiende únicamente los antebrazos hacia abajo hasta bloquear suavemente el codo y separar un poco las manos.',
+            safety: 'Mantén las muñecas firmes y neutras durante todo el recorrido.',
+            animType: 'tricep_pushdown'
+          }
+        ]
+      },
+      {
+        id: 'miercoles',
+        shortName: 'Mié • Pierna B',
+        dayBadge: 'Miércoles • Día 3',
+        title: 'Pierna B: Cadena Posterior (Glúteos, Isquios y Pantorrillas)',
+        focus: 'Trabajamos la bisagra de cadera y extensión pélvica con tus ligas más fuertes (40–90 y 50–125 lb), protegiendo la espalda baja y elevando el gasto metabólico.',
+        warmup: '15 puentes de glúteo sin peso en el suelo, 12 bisagras de cadera tocando la pared con los glúteos y 15 elevaciones suaves de talones.',
+        finisher: '2 rondas continuas (45 s trabajo / 15 s descanso): (1) Monster Walk (pasos laterales en semisentadilla con banda 15–35 lb), (2) Puente de glúteo isométrico en suelo, (3) Bird-Dog alterno en cuadrupedia.',
+        exercises: [
+          {
+            id: 'mie_1',
+            name: 'Peso Muerto Rumano con Banda Doble',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['cf_50_125'],
+            recLabel: 'CrossFit 50–125 lb',
+            anchor: 'Pisando la banda ancha doblada con ambos pies',
+            muscles: ['Isquiotibiales', 'Glúteo Mayor', 'Erectores Espinales'],
+            cues: 'Pisa la parte central de tu banda de 50–125 lb y toma ambos extremos como si fueran mancuernas. Desbloquea levemente las rodillas y lleva la cadera bien atrás manteniendo la espalda recta; sube apretando glúteos.',
+            safety: 'Imagina que cierras la puerta de un auto con los glúteos; las manos siempre rozan tus muslos/espinillas.',
+            animType: 'rdl_hinge'
+          },
+          {
+            id: 'mie_2',
+            name: 'Hip Thrust en Suelo o Sofá con Banda',
+            baseSets: 4,
+            reps: '15 reps',
+            recBands: ['cf_40_90'],
+            recLabel: 'CrossFit 40–90 lb o 50–125 lb',
+            anchor: 'Banda sobre la pelvis sujeta bajo pies o rodillas',
+            muscles: ['Glúteo Mayor', 'Isquiotibiales'],
+            cues: 'Acostado boca arriba (o apoyando espalda alta en el sofá), pasa la banda sobre tu cadera pisando o anclando los extremos. Empuja con los talones elevando la pelvis y sostén 2 segundos arriba.',
+            safety: 'Mantén la barbilla ligeramente pegada al pecho y las costillas bajas para no hiperextender la zona lumbar.',
+            animType: 'hip_thrust'
+          },
+          {
+            id: 'mie_3',
+            name: 'Pull-Through (Bisagra entre Piernas)',
+            baseSets: 4,
+            reps: '15 reps',
+            recBands: ['tub_40', 'tub_50'],
+            recLabel: 'Tubulares 40 + 50 lb (90 lb total)',
+            anchor: 'Anclaje bajo en puerta (de espaldas)',
+            muscles: ['Glúteo Mayor', 'Isquiotibiales'],
+            cues: 'De espaldas a la puerta, sujeta los manerales pasando por entre tus piernas. Deja que la liga lleve tu cadera hacia atrás y extiende la cadera con fuerza hacia adelante apretando los glúteos.',
+            safety: 'Los brazos funcionan como cuerdas pasivas; toda la fuerza nace del empuje de la cadera.',
+            animType: 'pull_through'
+          },
+          {
+            id: 'mie_4',
+            name: 'Curl Femoral Acostado (Prone Leg Curl)',
+            baseSets: 3,
+            reps: '15 reps / pierna',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Anclaje bajo en puerta • Enganchado al tobillo/pie',
+            muscles: ['Isquiotibiales (Bíceps Femoral)'],
+            cues: 'Acuéstate boca abajo sobre el tapete, asegura el maneral o tobillera en tu pie y flexiona la rodilla llevando el talón hacia el glúteo. Baja lentamente en 3 segundos.',
+            safety: 'Mantén la pelvis presionada contra el suelo para aislar el femoral sin arquear la espalda baja.',
+            animType: 'leg_curl_prone'
+          },
+          {
+            id: 'mie_5',
+            name: 'Buenos Días con Banda (Good Mornings)',
+            baseSets: 3,
+            reps: '15 reps',
+            recBands: ['cf_35_50'],
+            recLabel: 'CrossFit 35–50 lb',
+            anchor: 'Pisando la banda y apoyándola en trapecios',
+            muscles: ['Isquiotibiales', 'Glúteos', 'Espalda Baja'],
+            cues: 'Pisa la banda con ambos pies y pásala sobre los trapecios (base del cuello, nunca en las cervicales altas). Sujeta la banda con las manos a la altura del pecho y realiza una bisagra de cadera controlada.',
+            safety: 'Excelente para fortalecer la cadena posterior con mínima carga compresiva en manos.',
+            animType: 'good_morning'
+          },
+          {
+            id: 'mie_6',
+            name: 'Elevación de Pantorrillas con Banda',
+            baseSets: 4,
+            reps: '20 reps',
+            recBands: ['cf_40_90'],
+            recLabel: 'CrossFit 40–90 lb',
+            anchor: 'Pisando con metatarso • Banda en hombros',
+            muscles: ['Gastrocnemio (Gemelos)', 'Sóleo'],
+            cues: 'Con la banda colocada como en el ejercicio anterior, elévate sobre la punta de los pies lo más alto posible, haz una pausa de 2 segundos arriba y baja despacio.',
+            safety: 'Activa la bomba muscular de la pantorrilla, mejorando la circulación y protegiendo el tendón de Aquiles.',
+            animType: 'calf_raise'
+          }
+        ]
+      },
+      {
+        id: 'jueves',
+        shortName: 'Jue • Tracción',
+        dayBadge: 'Jueves • Día 4',
+        title: 'Tren Superior — Tracción (Espalda, Hombro Posterior y Bíceps)',
+        focus: 'Fortalecemos toda la musculatura dorsal, romboides y bíceps para mejorar la postura, abrir la caja torácica y equilibrar el trabajo de empuje.',
+        warmup: '15 retracciones escapulares con banda 15–35 lb, 10 rotaciones torácicas en cuadrupedia por lado y estiramiento dinámico de dorsales.',
+        finisher: '2 rondas (40 s trabajo / 20 s descanso): (1) Remo rápido alterno en posición atlética con ligas de 30 lb, (2) Leñadores diagonales (Woodchoppers) con liga de 20 lb, (3) Superman alterno en suelo.',
+        exercises: [
+          {
+            id: 'jue_1',
+            name: 'Jalón al Pecho desde Anclaje Alto',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['tub_40', 'tub_30'],
+            recLabel: 'Tubulares 40 + 30 lb (70 lb)',
+            anchor: 'Anclaje alto en puerta (Sentado/Arrodillado)',
+            muscles: ['Dorsal Ancho', 'Redondo Mayor', 'Bíceps'],
+            cues: 'Siéntate en el suelo o apóyate sobre un cojín frente a la puerta. Tracciona los manerales hacia la parte superior del pecho pensando en llevar los codos hacia tus bolsillos traseros.',
+            safety: 'Saca el pecho al jalar y evita encorvar los hombros hacia adelante.',
+            animType: 'lat_pulldown'
+          },
+          {
+            id: 'jue_2',
+            name: 'Remo Horizontal Sentado o de Pie',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['cf_40_90'],
+            recLabel: 'CrossFit 40–90 lb (o Tubulares 50+30 lb)',
+            anchor: 'Anclaje medio en puerta o plantas de los pies',
+            muscles: ['Espalda Media (Romboides)', 'Dorsal Ancho', 'Bíceps'],
+            cues: 'Con torso firme y erguido, jala los extremos hacia la boca del estómago juntando los omóplatos con fuerza durante 2 segundos antes de regresar en 3 segundos.',
+            safety: 'Si lo haces sentado en el piso pasando la banda por los pies, mantén las rodillas levemente flexionadas para cuidar la zona lumbar.',
+            animType: 'seated_row'
+          },
+          {
+            id: 'jue_3',
+            name: 'Pull-Over con Brazos Rectos (Polea Alta)',
+            baseSets: 3,
+            reps: '15 reps',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb',
+            anchor: 'Anclaje alto en puerta',
+            muscles: ['Dorsal Ancho', 'Serrato Anterior', 'Core'],
+            cues: 'De pie frente a la puerta, inclina el torso 30° al frente. Con los brazos casi rectos, baja los manerales en un arco amplio desde la altura de los ojos hasta tocar tus muslos.',
+            safety: 'Aísla el dorsal ancho sin fatigar los bíceps ni los codos.',
+            animType: 'straight_arm_pulldown'
+          },
+          {
+            id: 'jue_4',
+            name: 'Face Pull (Tracción a la Cara y Rotación Externa)',
+            baseSets: 4,
+            reps: '15–18 reps',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Anclaje alto en puerta',
+            muscles: ['Deltoides Posterior', 'Trapecio Medio/Inferior', 'Manguito Rotador'],
+            cues: 'Tracciona los manerales hacia tu frente separando las manos y llevando los pulgares hacia atrás en una pose de doble bíceps al final del recorrido.',
+            safety: 'El mejor ejercicio correctivo para mantener hombros sanos y postura erguida.',
+            animType: 'face_pull'
+          },
+          {
+            id: 'jue_5',
+            name: 'Curl de Bíceps de Pie Pisando Liga',
+            baseSets: 4,
+            reps: '12–15 reps',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb',
+            anchor: 'Pisando la liga con ambos pies',
+            muscles: ['Bíceps Braquial'],
+            cues: 'Con las palmas mirando al frente y los codos pegados a las costillas, flexiona los brazos subiendo en 1 segundo y bajando lentamente en 3 segundos.',
+            safety: 'No balancees la espalda para subir el peso; deja los codos fijos.',
+            animType: 'bicep_curl'
+          },
+          {
+            id: 'jue_6',
+            name: 'Curl Martillo con Banda Cerrada',
+            baseSets: 3,
+            reps: '15 reps',
+            recBands: ['cf_15_35'],
+            recLabel: 'CrossFit 15–35 lb',
+            anchor: 'Pisando la banda cerrada',
+            muscles: ['Braquial Anterior', 'Braquiorradial (Antebrazo)', 'Bíceps'],
+            cues: 'Sujeta la banda cerrada con agarre neutro (palmas enfrentadas entre sí) y realiza el curl manteniendo los pulgares apuntando hacia arriba.',
+            safety: 'El agarre neutro reduce cualquier tensión en las muñecas y codos.',
+            animType: 'hammer_curl'
+          }
+        ]
+      },
+      {
+        id: 'viernes',
+        shortName: 'Vie • Pierna C',
+        dayBadge: 'Viernes • Día 5',
+        title: 'Pierna C: Tren Inferior Completo y Estabilidad Pélvica',
+        focus: 'Combinamos sentadilla controlada a silla (Box Squat) con trabajo unilateral asistido y glúteo medio para proteger caderas y rodillas.',
+        warmup: 'Movilidad de cadera 90/90 sentado, 12 abducciones laterales de pierna por lado y 10 sentadillas pausadas.',
+        finisher: '2 rondas (40 s trabajo / 20 s descanso): (1) Caminata lateral de cangrejo con banda en rodillas, (2) Bisagra rápida tipo Swing con banda anclada abajo, (3) Plancha lateral sobre rodillas (30 s por lado).',
+        exercises: [
+          {
+            id: 'vie_1',
+            name: 'Sentadilla al Cajón / Silla (Box Squat)',
+            baseSets: 4,
+            reps: '12 reps',
+            recBands: ['cf_50_125'],
+            recLabel: 'CrossFit 50–125 lb',
+            anchor: 'Pisando la banda • Silla firme detrás',
+            muscles: ['Cuádriceps', 'Glúteo Mayor', 'Core'],
+            cues: 'Colócate frente a una silla estable. Baja en 3 segundos llevando la cadera hacia atrás hasta sentarte suavemente 1 segundo sin perder la tensión abdominal, y sube con potencia.',
+            safety: 'La silla elimina el estrés en la rodilla en el punto más bajo y te permite usar tu banda más pesada con total confianza.',
+            animType: 'box_squat'
+          },
+          {
+            id: 'vie_2',
+            name: 'Peso Muerto Unilateral Asistido (B-Stance RDL)',
+            baseSets: 3,
+            reps: '12 reps / pierna',
+            recBands: ['cf_35_50'],
+            recLabel: 'CrossFit 35–50 lb',
+            anchor: 'Pisando la banda con el pie delantero',
+            muscles: ['Glúteo Mayor', 'Isquiotibiales'],
+            cues: 'El pie que trabaja pisa la banda al frente, mientras el otro pie apoya solo la punta medio paso atrás como soporte de equilibrio (80% del peso adelante, 20% atrás). Realiza la bisagra de cadera.',
+            safety: 'Obtienes todos los beneficios del trabajo a una pierna sin riesgo de perder el equilibrio.',
+            animType: 'bstance_rdl'
+          },
+          {
+            id: 'vie_3',
+            name: 'Patada de Glúteo en Anclaje Bajo',
+            baseSets: 3,
+            reps: '15 reps / pierna',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Anclaje bajo en puerta (Tobillera o pie)',
+            muscles: ['Glúteo Mayor', 'Glúteo Medio'],
+            cues: 'Mirando a la puerta y apoyando las manos en ella, inclina levemente el tronco y empuja la pierna hacia atrás y 20° hacia afuera apretando el glúteo 2 segundos.',
+            safety: 'Evita arquear la cintura; el movimiento es corto y nace exclusivamente de la cadera.',
+            animType: 'glute_kickback'
+          },
+          {
+            id: 'vie_4',
+            name: 'Abducción de Cadera Sentado con Banda',
+            baseSets: 4,
+            reps: '20 reps',
+            recBands: ['cf_35_50'],
+            recLabel: 'CrossFit 35–50 lb (Doblada sobre rodillas)',
+            anchor: 'Sentado en silla • Banda rodeando muslos',
+            muscles: ['Glúteo Medio', 'Glúteo Menor'],
+            cues: 'Sentado en el borde de una silla con los pies fijos, rodea tus muslos justo arriba de las rodillas con la banda doblada. Separa las rodillas con fuerza y sostén 2 segundos.',
+            safety: 'Un glúteo medio fuerte es el principal estabilizador de la pelvis y la rodilla al caminar.',
+            animType: 'seated_abduction'
+          },
+          {
+            id: 'vie_5',
+            name: 'Step-Up Bajo Controlado (Escalón Bajo)',
+            baseSets: 3,
+            reps: '10 reps / pierna',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 lb (Opcional)',
+            anchor: 'Escalón estable bajo (15–20 cm)',
+            muscles: ['Cuádriceps', 'Glúteo Mayor'],
+            cues: 'Apoya todo el pie en un escalón bajo estable, inclina levemente el torso al frente y sube empujando únicamente con el talón de arriba. Baja en 3 segundos.',
+            safety: 'Si no tienes un escalón bajo o sientes fatiga en rodilla, sustitúyelo por Prensa Unilateral en Suelo.',
+            animType: 'step_up'
+          },
+          {
+            id: 'vie_6',
+            name: 'Dead Bug con Tensión Isométrica de Brazos',
+            baseSets: 3,
+            reps: '12 reps totales',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 lb',
+            anchor: 'Anclaje bajo detrás de la cabeza',
+            muscles: ['Core Profundo', 'Recto Abdominal'],
+            cues: 'Acostado boca arriba, sostén los manerales con brazos rectos apuntando al techo (tensión constante). Extiende una pierna lentamente hacia adelante sin despegar la espalda baja del tapete.',
+            safety: 'Máxima activación abdominal con la columna lumbar 100% protegida contra el piso.',
+            animType: 'dead_bug'
+          }
+        ]
+      },
+      {
+        id: 'sabado',
+        shortName: 'Sáb • Superior Total',
+        dayBadge: 'Sábado • Día 6',
+        title: 'Tren Superior Completo (Superseries de Bombeo y Gasto Calórico)',
+        focus: 'Alternamos ejercicios de empuje y tracción en superseries (1A+1B, 2A+2B, 3A+3B) para elevar la frecuencia cardíaca, oxidar grasa y dar tono a todo el torso.',
+        warmup: 'Movilidad general de hombros, muñecas y columna torácica + 20 band pull-aparts suaves con liga de 10 lb.',
+        finisher: 'Bloque Aeróbico Zona 2 (12 min): Caminata vigorosa continua (dentro de casa o al aire libre sin correr) manteniendo ritmo constante.',
+        exercises: [
+          {
+            id: 'sab_1',
+            name: '1A. Press Inclinado de Pecho (Anclaje Bajo)',
+            baseSets: 4,
+            reps: '15 reps (Seguir a 1B sin descanso)',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb',
+            anchor: 'Anclaje bajo en puerta (a tu espalda)',
+            muscles: ['Pectoral Superior (Clavicular)', 'Deltoides Anterior'],
+            cues: 'De espaldas al anclaje bajo, empuja los manerales en diagonal hacia arriba y al frente (45°) juntando las manos a la altura de la barbilla.',
+            safety: 'Al terminar las 15 repeticiones, voltea de inmediato hacia la puerta para realizar el ejercicio 1B.',
+            animType: 'incline_press'
+          },
+          {
+            id: 'sab_2',
+            name: '1B. Remo Alto para Espalda Media (Anclaje Medio)',
+            baseSets: 4,
+            reps: '15 reps (Descansar 60 s tras terminar)',
+            recBands: ['tub_40', 'tub_20'],
+            recLabel: 'Tubulares 40 + 20 lb (60 lb)',
+            anchor: 'Anclaje medio en puerta',
+            muscles: ['Romboides', 'Trapecio Medio', 'Deltoides Posterior'],
+            cues: 'Frente a la puerta, tracciona con los codos abiertos a 60° llevando las manos hacia la línea del pecho alto para exprimir toda la espalda alta.',
+            safety: 'Descansa 60 segundos después de completar la pareja 1A + 1B.',
+            animType: 'seated_row'
+          },
+          {
+            id: 'sab_3',
+            name: '2A. Press de Hombros Unilateral de Pie',
+            baseSets: 3,
+            reps: '12 reps / brazo (Seguir a 2B)',
+            recBands: ['tub_20'],
+            recLabel: 'Tubular 20 o 30 lb',
+            anchor: 'Pisando la liga con el pie del mismo lado',
+            muscles: ['Deltoides', 'Tríceps', 'Oblicuos (Estabilidad)'],
+            cues: 'Empuja con un solo brazo sobre la cabeza mientras el otro brazo se apoya en tu cintura o abdomen para verificar que el tronco no se incline.',
+            safety: 'El trabajo unilateral reduce la carga lumbar y activa los oblicuos.',
+            animType: 'overhead_press'
+          },
+          {
+            id: 'sab_4',
+            name: '2B. Jalón Unilateral en Anclaje Alto',
+            baseSets: 3,
+            reps: '12 reps / brazo (Descansar 60 s)',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 o 40 lb',
+            anchor: 'Anclaje alto en puerta',
+            muscles: ['Dorsal Ancho', 'Bíceps'],
+            cues: 'De rodillas o sentado frente a la puerta, jala con un brazo llevando el codo hacia tu cadera y girando la palma hacia ti al final.',
+            safety: 'Permite un rango de movimiento más largo y cómodo para el hombro.',
+            animType: 'lat_pulldown'
+          },
+          {
+            id: 'sab_5',
+            name: '3A. Curl de Bíceps desde Anclaje Bajo',
+            baseSets: 3,
+            reps: '15 reps (Seguir a 3B)',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 lb',
+            anchor: 'Anclaje bajo en puerta',
+            muscles: ['Bíceps Braquial'],
+            cues: 'Da un paso atrás frente al anclaje bajo para que exista tensión desde que el brazo está extendido. Flexiona los codos manteniendo los hombros atrás.',
+            safety: 'Tensión continua desde el primer centímetro del movimiento.',
+            animType: 'bicep_curl'
+          },
+          {
+            id: 'sab_6',
+            name: '3B. Extensión de Tríceps sobre la Cabeza',
+            baseSets: 3,
+            reps: '15 reps (Descansar 60 s)',
+            recBands: ['tub_30'],
+            recLabel: 'Tubular 30 lb',
+            anchor: 'Anclaje medio-bajo (De espaldas a la puerta)',
+            muscles: ['Tríceps (Cabeza Larga)'],
+            cues: 'De espaldas a la puerta con un pie adelantado, lleva los codos arriba junto a tus sienes y extiende los antebrazos hacia adelante y arriba.',
+            safety: 'Estira por completo la cabeza larga del tríceps sin forzar la espalda baja.',
+            animType: 'overhead_tricep'
+          }
+        ]
+      },
+      {
+        id: 'domingo',
+        shortName: 'Dom • Recuperación',
+        dayBadge: 'Domingo • Día 7',
+        title: 'Descanso Activo, Movilidad Articular y Descompresión',
+        focus: 'El músculo y el tejido conectivo se reparan durante el descanso. Dedica 20–30 minutos opcionales a liberar tensión articular y caminar suave.',
+        warmup: 'Respiración nasal profunda (4 segundos inhalando, 6 segundos exhalando) para activar el sistema nervioso parasimpático.',
+        finisher: 'Caminata suave recreativa a paso cómodo sin prisa e hidratación óptima para iniciar la siguiente semana al 100%.',
+        exercises: [
+          {
+            id: 'dom_1',
+            name: 'Estiramiento de Isquiotibiales Asistido con Banda',
+            baseSets: 2,
+            reps: '45 seg / pierna',
+            recBands: ['cf_15_35'],
+            recLabel: 'CrossFit 15–35 lb (Estiramiento pasivo)',
+            anchor: 'Acostado boca arriba • Banda en planta del pie',
+            muscles: ['Isquiotibiales', 'Gemelos', 'Descompresión Lumbar'],
+            cues: 'Acostado boca arriba, pasa la banda suave por el pie y eleva la pierna recta hasta sentir un estiramiento suave detrás del muslo. Respira profundo sin rebotar.',
+            safety: 'Relaja la tensión acumulada en la cadena posterior y descomprime las vértebras lumbares.',
+            animType: 'leg_press_floor'
+          },
+          {
+            id: 'dom_2',
+            name: 'Apertura Torácica y Pectoral con Banda Suave',
+            baseSets: 2,
+            reps: '12 repeticiones lentas',
+            recBands: ['tub_10'],
+            recLabel: 'Tubular 10 lb',
+            anchor: 'De pie sujetando la liga frente al pecho',
+            muscles: ['Movilidad Escapular', 'Pectoral', 'Hombros'],
+            cues: 'Separa suavemente la liga de 10 lb frente a tu pecho abriendo los brazos mientras inhalas profundamente, y regresa despacio al exhalar.',
+            safety: 'Mejora la postura tras la semana de trabajo y entrenamiento.',
+            animType: 'face_pull'
+          }
+        ]
+      }
+    ];
+
+    const WEEK_CONFIG = {
+      1: {
+        title: 'Semana 1 (Readaptación Neuromuscular • RIR 3):',
+        desc: 'Realiza 3 series en todos los ejercicios dejando 3 repeticiones en reserva para readaptar tendones sin agujetas severas.',
+        setsModifier: -1
+      },
+      2: {
+        title: 'Semana 2 (Consolidación Técnica • RIR 2):',
+        desc: 'Realiza las series indicadas en tabla (3 a 4) y añade 2 repeticiones por serie o aléjate medio paso del anclaje.',
+        setsModifier: 0
+      },
+      3: {
+        title: 'Semana 3 (Sobrecarga Progresiva • RIR 1–2):',
+        desc: 'Sube al siguiente calibre de liga o combina una liga tubular extra de 10–20 lb en los ejercicios compuestos.',
+        setsModifier: 0
+      },
+      4: {
+        title: 'Semana 4 (Máxima Tensión e Isometría • RIR 1):',
+        desc: 'Completa todas las series añadiendo una pausa isométrica de 2 segundos en el punto de máximo estiramiento de la liga.',
+        setsModifier: 1
+      }
+    };
+
+    // =========================================================================
+    // 3. APPLICATION STATE
+    // =========================================================================
+    let state = {
+      currentDayIndex: 0,
+      currentExIndex: 0,
+      currentWeek: 1,
+      selectedBands: ['cf_40_90'],
+      completedSets: {}, // key: `${exId}_set_${i}` -> boolean
+      soundEnabled: true,
+      // Animation state
+      animPlaying: true,
+      animSpeed: 1.0,
+      manualProgress: null, // null when auto-playing, 0..1 when scrubbing
+      cycleTime: 0, // seconds within the 5.0s 3-1-1 tempo cycle
+      // Timers
+      sessionSecondsLeft: 3600,
+      sessionRunning: false,
+      restSecondsLeft: 60,
+      restRunning: false,
+      finisherSecondsLeft: 40,
+      finisherPhase: 'work', // 'work' (40s) or 'rest' (20s)
+      finisherRunning: false
+    };
+
+    // Load saved progress safely
+    try {
+      const saved = localStorage.getItem('home_bands_workout_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.completedSets) state.completedSets = parsed.completedSets;
+        if (parsed.currentWeek) state.currentWeek = parsed.currentWeek;
+      }
+    } catch (e) {}
+
+    function saveProgress() {
+      try {
+        localStorage.setItem('home_bands_workout_v1', JSON.stringify({
+          completedSets: state.completedSets,
+          currentWeek: state.currentWeek
+        }));
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 4. WEB AUDIO API SOUND GENERATOR (Rest & Finisher Beeps)
+    // =========================================================================
+    let audioCtx = null;
+    function playBeep(freq = 660, duration = 0.18) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 5. UI RENDERING FUNCTIONS
+    // =========================================================================
+    function getCurrentDay() {
+      return WORKOUT_DAYS[state.currentDayIndex];
+    }
+
+    function getCurrentExercise() {
+      const day = getCurrentDay();
+      return day.exercises[state.currentExIndex] || day.exercises[0];
+    }
+
+    function getEffectiveSets(ex) {
+      const mod = WEEK_CONFIG[state.currentWeek].setsModifier;
+      return Math.max(2, Math.min(5, ex.baseSets + (state.currentWeek === 1 ? -1 : state.currentWeek === 4 ? 1 : 0)));
+    }
+
+    function renderDayTabs() {
+      const container = document.getElementById('day-tabs-container');
+      container.innerHTML = '';
+      WORKOUT_DAYS.forEach((day, idx) => {
+        const isActive = idx === state.currentDayIndex;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = isActive
+          ? 'px-3.5 py-2 rounded-xl text-xs font-extrabold bg-emerald-500 text-slate-950 shadow-md transition flex items-center gap-1.5'
+          : 'px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition flex items-center gap-1.5';
+        
+        // Calculate how many exercises of this day have all sets completed
+        let doneExCount = 0;
+        day.exercises.forEach(ex => {
+          const totalSets = getEffectiveSets(ex);
+          let setsDone = 0;
+          for (let s = 1; s <= totalSets; s++) {
+            if (state.completedSets[`${ex.id}_set_${s}`]) setsDone++;
+          }
+          if (setsDone === totalSets) doneExCount++;
+        });
+
+        const badgeText = doneExCount === day.exercises.length
+          ? '✓'
+          : `${doneExCount}/${day.exercises.length}`;
+
+        btn.innerHTML = `
+          <span>${day.shortName}</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] ${isActive ? 'bg-slate-950/25 text-slate-950 font-bold' : 'bg-slate-900 text-slate-400'}">${badgeText}</span>
+        `;
+        btn.addEventListener('click', () => {
+          state.currentDayIndex = idx;
+          state.currentExIndex = 0;
+          syncSelectedBandsToExercise();
+          renderAll();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function renderWeekControls() {
+      document.querySelectorAll('.week-btn').forEach(btn => {
+        const w = parseInt(btn.getAttribute('data-week'), 10);
+        if (w === state.currentWeek) {
+          btn.className = 'week-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-600 text-white transition';
+        } else {
+          btn.className = 'week-btn px-2.5 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition';
+        }
+      });
+      const cfg = WEEK_CONFIG[state.currentWeek];
+      document.getElementById('week-title').textContent = cfg.title;
+      document.getElementById('week-desc').textContent = cfg.desc;
+    }
+
+    function renderExerciseList() {
+      const day = getCurrentDay();
+      document.getElementById('day-badge').textContent = day.dayBadge;
+      document.getElementById('day-title').textContent = day.title;
+      document.getElementById('day-focus').textContent = day.focus;
+      document.getElementById('day-warmup').textContent = day.warmup;
+      document.getElementById('day-finisher').textContent = day.finisher;
+
+      const listContainer = document.getElementById('exercise-list-container');
+      listContainer.innerHTML = '';
+
+      let completedExercises = 0;
+
+      day.exercises.forEach((ex, idx) => {
+        const isSelected = idx === state.currentExIndex;
+        const totalSets = getEffectiveSets(ex);
+        let setsDone = 0;
+        for (let s = 1; s <= totalSets; s++) {
+          if (state.completedSets[`${ex.id}_set_${s}`]) setsDone++;
+        }
+        if (setsDone === totalSets) completedExercises++;
+
+        const card = document.createElement('div');
+        card.className = isSelected
+          ? 'rounded-2xl p-3.5 bg-slate-800 border-2 border-emerald-500 shadow-lg transition cursor-pointer'
+          : 'rounded-2xl p-3.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 transition cursor-pointer';
+
+        // Build set buttons HTML
+        let setsButtonsHtml = '';
+        for (let s = 1; s <= totalSets; s++) {
+          const key = `${ex.id}_set_${s}`;
+          const isDone = !!state.completedSets[key];
+          setsButtonsHtml += `
+            <button type="button" data-set-key="${key}" class="set-check-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+              isDone
+                ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                : 'bg-slate-900 hover:bg-slate-700 text-slate-300 border-slate-700'
+            }">
+              ${isDone ? '✓ Serie ' + s : 'Serie ' + s}
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start gap-2.5">
+              <div class="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center text-xs font-extrabold mt-0.5 ${
+                isSelected ? 'bg-emerald-500 text-slate-950' : 'bg-slate-700 text-slate-300'
+              }">
+                ${idx + 1}
+              </div>
+              <div>
+                <h3 class="text-sm font-bold ${isSelected ? 'text-emerald-300' : 'text-white'} leading-snug">
+                  ${ex.name}
+                </h3>
+                <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-400">
+                  <span class="font-semibold text-slate-200">${totalSets} × ${ex.reps}</span>
+                  <span>•</span>
+                  <span class="text-emerald-400 font-medium">${ex.recLabel}</span>
+                </div>
+              </div>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+              isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-400'
+            }">
+              ${isSelected ? '▶ Visualizando' : 'Ver animación'}
+            </span>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] text-slate-400">Marcar series completadas:</span>
+            <div class="flex flex-wrap gap-1.5">
+              ${setsButtonsHtml}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          const setBtn = e.target.closest('.set-check-btn');
+          if (setBtn) {
+            e.stopPropagation();
+            const setKey = setBtn.getAttribute('data-set-key');
+            state.completedSets[setKey] = !state.completedSets[setKey];
+            saveProgress();
+            if (state.completedSets[setKey]) {
+              // Automatically start 60s rest timer when checking off a set
+              startRestTimer(60);
+            }
+            if (state.currentExIndex !== idx) {
+              state.currentExIndex = idx;
+              syncSelectedBandsToExercise();
+            }
+            renderAll();
+            return;
+          }
+          state.currentExIndex = idx;
+          syncSelectedBandsToExercise();
+          renderAll();
+        });
+
+        listContainer.appendChild(card);
+      });
+
+      document.getElementById('day-progress-text').textContent =
+        `${completedExercises} / ${day.exercises.length} completados`;
+    }
+
+    function syncSelectedBandsToExercise() {
+      const ex = getCurrentExercise();
+      state.selectedBands = [...ex.recBands];
+      // In week 3 or 4, if tubular is used, we can still keep recBands or let user toggle
+    }
+
+    function renderVisualizerDetails() {
+      const ex = getCurrentExercise();
+      const totalSets = getEffectiveSets(ex);
+
+      document.getElementById('viz-ex-number').textContent = `Ejercicio ${state.currentExIndex + 1}`;
+      document.getElementById('viz-anchor-badge').textContent = `⚓ ${ex.anchor}`;
+      document.getElementById('viz-ex-name').textContent = ex.name;
+      document.getElementById('viz-rec-band').textContent = ex.recLabel;
+      document.getElementById('viz-ex-cues').textContent = ex.cues;
+      document.getElementById('viz-ex-safety').textContent = ex.safety;
+      document.getElementById('viz-prescription').textContent = `${totalSets} series × ${ex.reps}`;
+
+      // Render muscles
+      const musclesContainer = document.getElementById('viz-muscles-list');
+      musclesContainer.innerHTML = '';
+      ex.muscles.forEach(m => {
+        const span = document.createElement('span');
+        span.className = 'px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold';
+        span.textContent = m;
+        musclesContainer.appendChild(span);
+      });
+
+      // Render band selector chips
+      document.querySelectorAll('[data-band-id]').forEach(btn => {
+        const bandId = btn.getAttribute('data-band-id');
+        const bandObj = BAND_CATALOG[bandId];
+        const isSelected = state.selectedBands.includes(bandId);
+        if (isSelected) {
+          btn.className = 'band-chip px-2.5 py-1 rounded-md text-xs font-extrabold border-2 text-slate-950 shadow-sm';
+          btn.style.backgroundColor = bandObj.color;
+          btn.style.borderColor = '#ffffff';
+        } else {
+          btn.className = 'band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500';
+          btn.style.backgroundColor = '';
+          btn.style.borderColor = '';
+        }
+      });
+    }
+
+    function renderAll() {
+      renderDayTabs();
+      renderWeekControls();
+      renderExerciseList();
+      renderVisualizerDetails();
+    }
+
+    // =========================================================================
+    // 6. BIOMECHANICAL CANVAS ANIMATION ENGINE (36 EXERCISES)
+    // =========================================================================
+    const canvas = document.getElementById('biomech-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function lerpPoint(p1, p2, t) {
+      return { x: lerp(p1.x, p2.x, t), y: lerp(p1.y, p2.y, t) };
+    }
+
+    // Returns smooth 0..1 contraction value from the 5.0-second 3-1-1 tempo cycle:
+    // 0.0 - 1.0s: Concentric phase (0 -> 1)
+    // 1.0 - 2.0s: Isometric peak hold (1 -> 1)
+    // 2.0 - 5.0s: Eccentric controlled return (1 -> 0)
+    function getContractionFromCycle(cycleSec) {
+      const t = ((cycleSec % 5.0) + 5.0) % 5.0;
+      let phaseName = '';
+      let phaseColor = '#34d399';
+      let p = 0;
+
+      if (t < 1.0) {
+        const u = t / 1.0;
+        p = 0.5 - 0.5 * Math.cos(u * Math.PI);
+        phaseName = 'CONCÉNTRICA (1s) — Supera la resistencia';
+        phaseColor = '#34d399';
+      } else if (t < 2.0) {
+        p = 1.0;
+        phaseName = 'PAUSA ISOMÉTRICA (1s) — Máxima contracción';
+        phaseColor = '#fbbf24';
+      } else {
+        const u = (t - 2.0) / 3.0;
+        p = 0.5 + 0.5 * Math.cos(u * Math.PI);
+        phaseName = 'EXCÉNTRICA (3s) — Retén la liga despacio';
+        phaseColor = '#38bdf8';
+      }
+      return { p, phaseName, phaseColor };
+    }
+
+    // Define start (p=0) and peak contraction (p=1) joint coordinates for each pattern
+    // Coordinates in a 760x400 canvas, floor at y = 340, door/wall at x = 140
+    function getPoseForPattern(animType, p) {
+      const floorY = 340;
+      const doorX = 140;
+
+      // Default standing upright reference
+      let start = {
+        head: { x: 420, y: 120 },
+        shoulder: { x: 420, y: 162 },
+        hip: { x: 420, y: 245 },
+        knee: { x: 425, y: 295 },
+        ankle: { x: 420, y: 338 },
+        knee2: { x: 405, y: 295 },
+        ankle2: { x: 400, y: 338 },
+        elbow: { x: 415, y: 205 },
+        hand: { x: 435, y: 210 },
+        anchor: { x: 420, y: 340 },
+        anchorLabel: 'Piso (Bajo los pies)',
+        activeZone: 'legs',
+        chair: false
+      };
+
+      let end = JSON.parse(JSON.stringify(start));
+
+      switch (animType) {
+        case 'squat_front': {
+          // p=0 is bottom of squat or top? In squat, concentric (pushing against band) is standing up,
+          // so let's show p=0 as bottom of squat -> p=1 standing tall, OR p=0 standing -> p=1 squat & stand.
+          // Even clearer for user: p=0 is standing start, p=1 is deep controlled squat with band tension!
+          start = {
+            ...start,
+            head: { x: 420, y: 118 },
+            shoulder: { x: 420, y: 160 },
+            hip: { x: 415, y: 242 },
+            knee: { x: 422, y: 292 },
+            ankle: { x: 420, y: 338 },
+            elbow: { x: 448, y: 168 },
+            hand: { x: 428, y: 156 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pisando Banda Cerrada',
+            activeZone: 'quads',
+            chair: true
+          };
+          end = {
+            ...start,
+            head: { x: 412, y: 168 },
+            shoulder: { x: 405, y: 208 },
+            hip: { x: 365, y: 278 },
+            knee: { x: 438, y: 282 },
+            ankle: { x: 420, y: 338 },
+            elbow: { x: 438, y: 212 },
+            hand: { x: 415, y: 202 }
+          };
+          break;
+        }
+
+        case 'box_squat': {
+          start = {
+            ...start,
+            head: { x: 420, y: 118 },
+            shoulder: { x: 420, y: 160 },
+            hip: { x: 415, y: 242 },
+            knee: { x: 422, y: 292 },
+            ankle: { x: 420, y: 338 },
+            elbow: { x: 445, y: 175 },
+            hand: { x: 430, y: 160 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pisando Banda + Silla Detrás',
+            activeZone: 'quads',
+            chair: true
+          };
+          end = {
+            ...start,
+            head: { x: 400, y: 170 },
+            shoulder: { x: 392, y: 210 },
+            hip: { x: 355, y: 276 },
+            knee: { x: 430, y: 280 },
+            ankle: { x: 420, y: 338 },
+            elbow: { x: 425, y: 215 },
+            hand: { x: 405, y: 205 }
+          };
+          break;
+        }
+
+        case 'squat_sumo': {
+          start = {
+            ...start,
+            head: { x: 420, y: 122 },
+            shoulder: { x: 420, y: 164 },
+            hip: { x: 420, y: 244 },
+            knee: { x: 445, y: 292 },
+            ankle: { x: 455, y: 338 },
+            knee2: { x: 395, y: 292 },
+            ankle2: { x: 385, y: 338 },
+            elbow: { x: 420, y: 210 },
+            hand: { x: 420, y: 252 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pies Abiertos a 45° (Sumo)',
+            activeZone: 'quads'
+          };
+          end = {
+            ...start,
+            head: { x: 420, y: 168 },
+            shoulder: { x: 420, y: 210 },
+            hip: { x: 420, y: 282 },
+            knee: { x: 465, y: 285 },
+            ankle: { x: 455, y: 338 },
+            knee2: { x: 375, y: 285 },
+            ankle2: { x: 385, y: 338 },
+            elbow: { x: 420, y: 252 },
+            hand: { x: 420, y: 295 }
+          };
+          break;
+        }
+
+        case 'leg_press_floor': {
+          start = {
+            ...start,
+            head: { x: 260, y: 318 },
+            shoulder: { x: 305, y: 322 },
+            hip: { x: 395, y: 325 },
+            knee: { x: 365, y: 255 },
+            ankle: { x: 415, y: 235 },
+            knee2: { x: 445, y: 290 },
+            ankle2: { x: 475, y: 338 },
+            elbow: { x: 345, y: 328 },
+            hand: { x: 385, y: 312 },
+            anchor: { x: 385, y: 312 },
+            anchorLabel: 'Sujetando Banda en Cadera',
+            activeZone: 'quads'
+          };
+          end = {
+            ...start,
+            knee: { x: 445, y: 270 },
+            ankle: { x: 505, y: 225 },
+            anchor: { x: 505, y: 225 }
+          };
+          break;
+        }
+
+        case 'tke_knee': {
+          start = {
+            ...start,
+            head: { x: 390, y: 118 },
+            shoulder: { x: 390, y: 160 },
+            hip: { x: 390, y: 242 },
+            knee: { x: 358, y: 292 },
+            ankle: { x: 385, y: 338 },
+            knee2: { x: 415, y: 292 },
+            ankle2: { x: 420, y: 338 },
+            elbow: { x: 390, y: 202 },
+            hand: { x: 390, y: 235 },
+            anchor: { x: doorX, y: 292 },
+            anchorLabel: 'Anclaje a Altura de Rodilla',
+            activeZone: 'quads'
+          };
+          end = {
+            ...start,
+            knee: { x: 392, y: 292 },
+            ankle: { x: 385, y: 338 }
+          };
+          break;
+        }
+
+        case 'split_squat': {
+          start = {
+            ...start,
+            head: { x: 410, y: 120 },
+            shoulder: { x: 410, y: 162 },
+            hip: { x: 410, y: 242 },
+            knee: { x: 445, y: 290 },
+            ankle: { x: 450, y: 338 },
+            knee2: { x: 365, y: 295 },
+            ankle2: { x: 330, y: 338 },
+            elbow: { x: 410, y: 205 },
+            hand: { x: 425, y: 240 },
+            anchor: { x: 450, y: 338 },
+            anchorLabel: 'Pisando con Pie Delantero',
+            activeZone: 'quads'
+          };
+          end = {
+            ...start,
+            head: { x: 410, y: 164 },
+            shoulder: { x: 410, y: 204 },
+            hip: { x: 410, y: 280 },
+            knee: { x: 460, y: 285 },
+            ankle: { x: 450, y: 338 },
+            knee2: { x: 365, y: 325 },
+            ankle2: { x: 330, y: 338 },
+            elbow: { x: 410, y: 245 },
+            hand: { x: 425, y: 275 }
+          };
+          break;
+        }
+
+        case 'pallof_press': {
+          start = {
+            ...start,
+            head: { x: 410, y: 120 },
+            shoulder: { x: 410, y: 162 },
+            hip: { x: 410, y: 245 },
+            elbow: { x: 395, y: 198 },
+            hand: { x: 415, y: 185 },
+            anchor: { x: doorX, y: 185 },
+            anchorLabel: 'Anclaje Medio (Antirrotación)',
+            activeZone: 'core'
+          };
+          end = {
+            ...start,
+            elbow: { x: 455, y: 185 },
+            hand: { x: 495, y: 185 }
+          };
+          break;
+        }
+
+        case 'chest_press': {
+          start = {
+            ...start,
+            head: { x: 395, y: 120 },
+            shoulder: { x: 390, y: 162 },
+            hip: { x: 385, y: 245 },
+            knee: { x: 415, y: 292 },
+            ankle: { x: 425, y: 338 },
+            knee2: { x: 355, y: 295 },
+            ankle2: { x: 340, y: 338 },
+            elbow: { x: 355, y: 185 },
+            hand: { x: 395, y: 175 },
+            anchor: { x: doorX, y: 175 },
+            anchorLabel: 'Anclaje Medio en Puerta',
+            activeZone: 'chest'
+          };
+          end = {
+            ...start,
+            elbow: { x: 435, y: 175 },
+            hand: { x: 485, y: 172 }
+          };
+          break;
+        }
+
+        case 'incline_press': {
+          start = {
+            ...start,
+            head: { x: 395, y: 120 },
+            shoulder: { x: 390, y: 162 },
+            hip: { x: 385, y: 245 },
+            elbow: { x: 360, y: 192 },
+            hand: { x: 398, y: 175 },
+            anchor: { x: doorX, y: 315 },
+            anchorLabel: 'Anclaje Bajo en Puerta',
+            activeZone: 'chest'
+          };
+          end = {
+            ...start,
+            elbow: { x: 432, y: 155 },
+            hand: { x: 478, y: 132 }
+          };
+          break;
+        }
+
+        case 'floor_press': {
+          start = {
+            ...start,
+            head: { x: 260, y: 320 },
+            shoulder: { x: 310, y: 322 },
+            hip: { x: 400, y: 325 },
+            knee: { x: 445, y: 280 },
+            ankle: { x: 475, y: 338 },
+            knee2: { x: 445, y: 280 },
+            ankle2: { x: 475, y: 338 },
+            elbow: { x: 315, y: 334 },
+            hand: { x: 315, y: 285 },
+            anchor: { x: 310, y: 332 },
+            anchorLabel: 'Banda Detrás de Espalda en Suelo',
+            activeZone: 'chest'
+          };
+          end = {
+            ...start,
+            elbow: { x: 312, y: 268 },
+            hand: { x: 312, y: 215 }
+          };
+          break;
+        }
+
+        case 'chest_fly': {
+          start = {
+            ...start,
+            head: { x: 395, y: 120 },
+            shoulder: { x: 390, y: 162 },
+            hip: { x: 385, y: 245 },
+            elbow: { x: 350, y: 178 },
+            hand: { x: 365, y: 178 },
+            anchor: { x: doorX, y: 175 },
+            anchorLabel: 'Anclaje Medio (Aperturas)',
+            activeZone: 'chest'
+          };
+          end = {
+            ...start,
+            elbow: { x: 435, y: 178 },
+            hand: { x: 480, y: 175 }
+          };
+          break;
+        }
+
+        case 'overhead_press': {
+          start = {
+            ...start,
+            head: { x: 420, y: 122 },
+            shoulder: { x: 420, y: 164 },
+            hip: { x: 420, y: 245 },
+            elbow: { x: 405, y: 185 },
+            hand: { x: 425, y: 152 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pisando la Liga con los Pies',
+            activeZone: 'shoulders'
+          };
+          end = {
+            ...start,
+            elbow: { x: 422, y: 112 },
+            hand: { x: 425, y: 65 }
+          };
+          break;
+        }
+
+        case 'lateral_raise': {
+          start = {
+            ...start,
+            head: { x: 420, y: 122 },
+            shoulder: { x: 420, y: 164 },
+            hip: { x: 420, y: 245 },
+            elbow: { x: 425, y: 205 },
+            hand: { x: 430, y: 242 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pisando la Liga Suave (10–20 lb)',
+            activeZone: 'shoulders'
+          };
+          end = {
+            ...start,
+            elbow: { x: 465, y: 164 },
+            hand: { x: 505, y: 162 }
+          };
+          break;
+        }
+
+        case 'tricep_pushdown': {
+          start = {
+            ...start,
+            head: { x: 375, y: 122 },
+            shoulder: { x: 380, y: 164 },
+            hip: { x: 385, y: 245 },
+            elbow: { x: 375, y: 205 },
+            hand: { x: 335, y: 175 },
+            anchor: { x: doorX, y: 85 },
+            anchorLabel: 'Anclaje Alto en Puerta',
+            activeZone: 'arms'
+          };
+          end = {
+            ...start,
+            elbow: { x: 375, y: 205 },
+            hand: { x: 365, y: 252 }
+          };
+          break;
+        }
+
+        case 'overhead_tricep': {
+          start = {
+            ...start,
+            head: { x: 395, y: 122 },
+            shoulder: { x: 390, y: 164 },
+            hip: { x: 385, y: 245 },
+            elbow: { x: 405, y: 118 },
+            hand: { x: 368, y: 145 },
+            anchor: { x: doorX, y: 240 },
+            anchorLabel: 'Anclaje Medio-Bajo (De Espaldas)',
+            activeZone: 'arms'
+          };
+          end = {
+            ...start,
+            elbow: { x: 405, y: 118 },
+            hand: { x: 448, y: 78 }
+          };
+          break;
+        }
+
+        case 'rdl_hinge':
+        case 'bstance_rdl': {
+          start = {
+            ...start,
+            head: { x: 375, y: 165 },
+            shoulder: { x: 385, y: 200 },
+            hip: { x: 335, y: 242 },
+            knee: { x: 405, y: 292 },
+            ankle: { x: 410, y: 338 },
+            knee2: animType === 'bstance_rdl' ? { x: 375, y: 295 } : { x: 405, y: 292 },
+            ankle2: animType === 'bstance_rdl' ? { x: 360, y: 338 } : { x: 410, y: 338 },
+            elbow: { x: 395, y: 248 },
+            hand: { x: 405, y: 292 },
+            anchor: { x: 410, y: 338 },
+            anchorLabel: 'Pisando Banda Cerrada Pesada',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            head: { x: 415, y: 120 },
+            shoulder: { x: 415, y: 162 },
+            hip: { x: 415, y: 242 },
+            knee: { x: 415, y: 292 },
+            ankle: { x: 410, y: 338 },
+            elbow: { x: 415, y: 205 },
+            hand: { x: 418, y: 248 }
+          };
+          break;
+        }
+
+        case 'good_morning': {
+          start = {
+            ...start,
+            head: { x: 365, y: 170 },
+            shoulder: { x: 380, y: 202 },
+            hip: { x: 335, y: 242 },
+            knee: { x: 405, y: 292 },
+            ankle: { x: 410, y: 338 },
+            elbow: { x: 395, y: 215 },
+            hand: { x: 382, y: 198 },
+            anchor: { x: 410, y: 338 },
+            anchorLabel: 'Pisando Banda + Trapecios',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            head: { x: 415, y: 120 },
+            shoulder: { x: 415, y: 162 },
+            hip: { x: 415, y: 242 },
+            knee: { x: 415, y: 292 },
+            ankle: { x: 410, y: 338 },
+            elbow: { x: 428, y: 185 },
+            hand: { x: 418, y: 162 }
+          };
+          break;
+        }
+
+        case 'hip_thrust': {
+          start = {
+            ...start,
+            head: { x: 265, y: 315 },
+            shoulder: { x: 310, y: 320 },
+            hip: { x: 385, y: 328 },
+            knee: { x: 455, y: 272 },
+            ankle: { x: 465, y: 338 },
+            knee2: { x: 455, y: 272 },
+            ankle2: { x: 465, y: 338 },
+            elbow: { x: 350, y: 325 },
+            hand: { x: 385, y: 322 },
+            anchor: { x: 465, y: 338 },
+            anchorLabel: 'Banda sobre Pelvis Anclada en Pies',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            hip: { x: 388, y: 272 },
+            hand: { x: 388, y: 270 }
+          };
+          break;
+        }
+
+        case 'pull_through': {
+          start = {
+            ...start,
+            head: { x: 455, y: 168 },
+            shoulder: { x: 440, y: 202 },
+            hip: { x: 375, y: 244 },
+            knee: { x: 425, y: 292 },
+            ankle: { x: 425, y: 338 },
+            elbow: { x: 405, y: 242 },
+            hand: { x: 365, y: 268 },
+            anchor: { x: doorX, y: 318 },
+            anchorLabel: 'Anclaje Bajo (De Espaldas)',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            head: { x: 430, y: 120 },
+            shoulder: { x: 430, y: 162 },
+            hip: { x: 435, y: 242 },
+            knee: { x: 430, y: 292 },
+            ankle: { x: 425, y: 338 },
+            elbow: { x: 432, y: 208 },
+            hand: { x: 438, y: 250 }
+          };
+          break;
+        }
+
+        case 'leg_curl_prone': {
+          start = {
+            ...start,
+            head: { x: 495, y: 315 },
+            shoulder: { x: 450, y: 322 },
+            hip: { x: 360, y: 328 },
+            knee: { x: 285, y: 330 },
+            ankle: { x: 215, y: 328 },
+            knee2: { x: 285, y: 332 },
+            ankle2: { x: 215, y: 334 },
+            elbow: { x: 485, y: 334 },
+            hand: { x: 515, y: 335 },
+            anchor: { x: doorX, y: 325 },
+            anchorLabel: 'Anclaje Bajo en Tobillo',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            ankle: { x: 305, y: 260 }
+          };
+          break;
+        }
+
+        case 'calf_raise': {
+          start = {
+            ...start,
+            head: { x: 420, y: 122 },
+            shoulder: { x: 420, y: 164 },
+            hip: { x: 420, y: 245 },
+            knee: { x: 420, y: 292 },
+            ankle: { x: 420, y: 338 },
+            elbow: { x: 435, y: 185 },
+            hand: { x: 422, y: 162 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Elevación sobre Punta de Pies',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            head: { x: 420, y: 104 },
+            shoulder: { x: 420, y: 146 },
+            hip: { x: 420, y: 227 },
+            knee: { x: 420, y: 274 },
+            ankle: { x: 420, y: 318 },
+            elbow: { x: 435, y: 167 },
+            hand: { x: 422, y: 144 }
+          };
+          break;
+        }
+
+        case 'lat_pulldown': {
+          start = {
+            ...start,
+            head: { x: 380, y: 178 },
+            shoulder: { x: 385, y: 218 },
+            hip: { x: 390, y: 295 },
+            knee: { x: 345, y: 334 },
+            ankle: { x: 405, y: 336 },
+            knee2: { x: 345, y: 334 },
+            ankle2: { x: 405, y: 336 },
+            elbow: { x: 345, y: 175 },
+            hand: { x: 305, y: 142 },
+            anchor: { x: doorX, y: 80 },
+            anchorLabel: 'Anclaje Alto en Puerta',
+            activeZone: 'back'
+          };
+          end = {
+            ...start,
+            elbow: { x: 398, y: 252 },
+            hand: { x: 368, y: 222 }
+          };
+          break;
+        }
+
+        case 'seated_row': {
+          start = {
+            ...start,
+            head: { x: 395, y: 122 },
+            shoulder: { x: 395, y: 164 },
+            hip: { x: 395, y: 245 },
+            elbow: { x: 355, y: 185 },
+            hand: { x: 310, y: 185 },
+            anchor: { x: doorX, y: 185 },
+            anchorLabel: 'Anclaje Medio en Puerta',
+            activeZone: 'back'
+          };
+          end = {
+            ...start,
+            elbow: { x: 428, y: 198 },
+            hand: { x: 392, y: 198 }
+          };
+          break;
+        }
+
+        case 'straight_arm_pulldown': {
+          start = {
+            ...start,
+            head: { x: 375, y: 132 },
+            shoulder: { x: 385, y: 172 },
+            hip: { x: 405, y: 245 },
+            elbow: { x: 335, y: 152 },
+            hand: { x: 290, y: 135 },
+            anchor: { x: doorX, y: 85 },
+            anchorLabel: 'Anclaje Alto (Brazos Rectos)',
+            activeZone: 'back'
+          };
+          end = {
+            ...start,
+            elbow: { x: 382, y: 215 },
+            hand: { x: 395, y: 252 }
+          };
+          break;
+        }
+
+        case 'face_pull': {
+          start = {
+            ...start,
+            head: { x: 395, y: 122 },
+            shoulder: { x: 395, y: 164 },
+            hip: { x: 395, y: 245 },
+            elbow: { x: 350, y: 155 },
+            hand: { x: 305, y: 145 },
+            anchor: { x: doorX, y: 115 },
+            anchorLabel: 'Anclaje Alto-Medio (Face Pull)',
+            activeZone: 'back'
+          };
+          end = {
+            ...start,
+            elbow: { x: 425, y: 148 },
+            hand: { x: 398, y: 122 }
+          };
+          break;
+        }
+
+        case 'bicep_curl':
+        case 'hammer_curl': {
+          start = {
+            ...start,
+            head: { x: 420, y: 122 },
+            shoulder: { x: 420, y: 164 },
+            hip: { x: 420, y: 245 },
+            elbow: { x: 418, y: 208 },
+            hand: { x: 405, y: 248 },
+            anchor: { x: 420, y: 338 },
+            anchorLabel: 'Pisando la Liga con los Pies',
+            activeZone: 'arms'
+          };
+          end = {
+            ...start,
+            elbow: { x: 418, y: 208 },
+            hand: { x: 388, y: 164 }
+          };
+          break;
+        }
+
+        case 'glute_kickback': {
+          start = {
+            ...start,
+            head: { x: 355, y: 132 },
+            shoulder: { x: 370, y: 172 },
+            hip: { x: 395, y: 242 },
+            knee: { x: 392, y: 292 },
+            ankle: { x: 385, y: 334 },
+            knee2: { x: 398, y: 292 },
+            ankle2: { x: 398, y: 338 },
+            elbow: { x: 335, y: 195 },
+            hand: { x: 295, y: 185 },
+            anchor: { x: doorX, y: 325 },
+            anchorLabel: 'Anclaje Bajo en Tobillo',
+            activeZone: 'glutes'
+          };
+          end = {
+            ...start,
+            knee: { x: 438, y: 282 },
+            ankle: { x: 478, y: 312 }
+          };
+          break;
+        }
+
+        case 'seated_abduction': {
+          start = {
+            ...start,
+            head: { x: 395, y: 148 },
+            shoulder: { x: 395, y: 188 },
+            hip: { x: 395, y: 262 },
+            knee: { x: 448, y: 265 },
+            ankle: { x: 448, y: 338 },
+            knee2: { x: 442, y: 265 },
+            ankle2: { x: 442, y: 338 },
+            elbow: { x: 385, y: 225 },
+            hand: { x: 405, y: 255 },
+            anchor: { x: 442, y: 265 },
+            anchorLabel: 'Banda Rodeando Ambos Muslos',
+            activeZone: 'glutes',
+            chair: true
+          };
+          end = {
+            ...start,
+            knee: { x: 472, y: 252 },
+            knee2: { x: 422, y: 275 },
+            anchor: { x: 422, y: 275 }
+          };
+          break;
+        }
+
+        case 'step_up': {
+          start = {
+            ...start,
+            head: { x: 395, y: 128 },
+            shoulder: { x: 395, y: 170 },
+            hip: { x: 395, y: 250 },
+            knee: { x: 435, y: 265 },
+            ankle: { x: 440, y: 312 },
+            knee2: { x: 385, y: 295 },
+            ankle2: { x: 375, y: 338 },
+            elbow: { x: 395, y: 210 },
+            hand: { x: 410, y: 245 },
+            anchor: { x: 440, y: 312 },
+            anchorLabel: 'Escalón Estable Bajo (15–20 cm)',
+            activeZone: 'quads'
+          };
+          end = {
+            ...start,
+            head: { x: 435, y: 98 },
+            shoulder: { x: 435, y: 140 },
+            hip: { x: 435, y: 220 },
+            knee: { x: 438, y: 265 },
+            ankle: { x: 440, y: 312 },
+            knee2: { x: 430, y: 268 },
+            ankle2: { x: 425, y: 312 },
+            elbow: { x: 435, y: 180 },
+            hand: { x: 445, y: 215 }
+          };
+          break;
+        }
+
+        case 'dead_bug': {
+          start = {
+            ...start,
+            head: { x: 265, y: 320 },
+            shoulder: { x: 310, y: 322 },
+            hip: { x: 395, y: 325 },
+            knee: { x: 395, y: 260 },
+            ankle: { x: 448, y: 260 },
+            knee2: { x: 395, y: 260 },
+            ankle2: { x: 448, y: 260 },
+            elbow: { x: 310, y: 275 },
+            hand: { x: 310, y: 230 },
+            anchor: { x: doorX, y: 315 },
+            anchorLabel: 'Anclaje Bajo Detrás + Core Activo',
+            activeZone: 'core'
+          };
+          end = {
+            ...start,
+            knee: { x: 465, y: 298 },
+            ankle: { x: 525, y: 312 }
+          };
+          break;
+        }
+      }
+
+      return {
+        head: lerpPoint(start.head, end.head, p),
+        shoulder: lerpPoint(start.shoulder, end.shoulder, p),
+        hip: lerpPoint(start.hip, end.hip, p),
+        knee: lerpPoint(start.knee, end.knee, p),
+        ankle: lerpPoint(start.ankle, end.ankle, p),
+        knee2: lerpPoint(start.knee2, end.knee2, p),
+        ankle2: lerpPoint(start.ankle2, end.ankle2, p),
+        elbow: lerpPoint(start.elbow, end.elbow, p),
+        hand: lerpPoint(start.hand, end.hand, p),
+        anchor: lerpPoint(start.anchor, end.anchor, p),
+        anchorLabel: start.anchorLabel,
+        activeZone: start.activeZone,
+        chair: start.chair,
+        animType
+      };
+    }
+
+    function drawLimb(p1, p2, width, color, highlight = false) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineCap = 'round';
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      if (highlight) {
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 14;
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawJoint(pt, radius, color = '#e2e8f0') {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function drawBiomechFrame(p) {
+      const ex = getCurrentExercise();
+      const pose = getPoseForPattern(ex.animType, p);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Background Grid & Floor
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx < canvas.width; gx += 40) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, 340);
+        ctx.stroke();
+      }
+      for (let gy = 0; gy < 340; gy += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(canvas.width, gy);
+        ctx.stroke();
+      }
+
+      // Floor / Exercise Mat
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 340, canvas.width, 60);
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(210, 336, 360, 8);
+
+      // Door / Anchor Pillar on Left (x = 130..145)
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(128, 55, 14, 285);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(128, 55, 14, 285);
+
+      // Optional Chair / Box if used by exercise
+      if (pose.chair) {
+        ctx.save();
+        ctx.strokeStyle = '#64748b';
+        ctx.fillStyle = 'rgba(51, 65, 85, 0.65)';
+        ctx.lineWidth = 3;
+        // Seat at y=280, x=325..375
+        ctx.fillRect(320, 278, 58, 10);
+        ctx.fillRect(322, 288, 8, 50);
+        ctx.fillRect(368, 288, 8, 50);
+        ctx.fillRect(320, 215, 8, 65);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 10px Inter, sans-serif';
+        ctx.fillText('Silla / Cajón', 318, 208);
+        ctx.restore();
+      }
+
+      // Optional low step for step_up
+      if (pose.animType === 'step_up') {
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(415, 312, 65, 26);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(415, 312, 65, 26);
+      }
+
+      // 2. Draw Back Leg
+      const isLegFocus = pose.activeZone === 'quads' || pose.activeZone === 'glutes';
+      drawLimb(pose.hip, pose.knee2, 16, '#475569', false);
+      drawLimb(pose.knee2, pose.ankle2, 13, '#475569', false);
+
+      // 3. Draw Torso (with glowing muscle aura if back/chest/core)
+      const isTorsoFocus = pose.activeZone === 'chest' || pose.activeZone === 'back' || pose.activeZone === 'core';
+      drawLimb(pose.shoulder, pose.hip, 24, isTorsoFocus ? '#10b981' : '#cbd5e1', isTorsoFocus);
+
+      // 4. Draw Front Leg (highlighted if quads/glutes active)
+      drawLimb(pose.hip, pose.knee, 18, isLegFocus ? '#10b981' : '#94a3b8', isLegFocus);
+      drawLimb(pose.knee, pose.ankle, 14, isLegFocus ? '#34d399' : '#cbd5e1', false);
+
+      // Foot
+      drawLimb(pose.ankle, { x: pose.ankle.x + 18, y: pose.ankle.y }, 10, '#e2e8f0', false);
+
+      // 5. Draw Head & Neck
+      drawLimb(pose.shoulder, pose.head, 10, '#cbd5e1', false);
+      ctx.beginPath();
+      ctx.arc(pose.head.x, pose.head.y - 8, 17, 0, Math.PI * 2);
+      ctx.fillStyle = '#f1f5f9';
+      ctx.fill();
+
+      // 6. Draw Resistance Band(s) Connecting Anchor to Target Attachment Point
+      let attachPt = pose.hand;
+      if (pose.animType === 'tke_knee' || pose.animType === 'seated_abduction') {
+        attachPt = pose.knee;
+      } else if (pose.animType === 'leg_curl_prone' || pose.animType === 'glute_kickback') {
+        attachPt = pose.ankle;
+      } else if (pose.animType === 'hip_thrust') {
+        attachPt = pose.hip;
+      }
+
+      const activeBands = state.selectedBands.length > 0
+        ? state.selectedBands.map(id => BAND_CATALOG[id]).filter(Boolean)
+        : [BAND_CATALOG.cf_40_90];
+
+      activeBands.forEach((band, bIdx) => {
+        const offset = (bIdx - (activeBands.length - 1) / 2) * 5;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(pose.anchor.x, pose.anchor.y + offset);
+        ctx.lineTo(attachPt.x, attachPt.y + offset);
+        ctx.lineWidth = Math.max(3, band.width - p * 1.5);
+        ctx.strokeStyle = band.color;
+        ctx.shadowColor = band.color;
+        ctx.shadowBlur = 8 + p * 8;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Draw Anchor Point Ring
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pose.anchor.x, pose.anchor.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      ctx.restore();
+
+      // 7. Draw Arm (Upper arm + Forearm)
+      const isArmFocus = pose.activeZone === 'arms' || pose.activeZone === 'shoulders' || pose.activeZone === 'chest' || pose.activeZone === 'back';
+      drawLimb(pose.shoulder, pose.elbow, 14, isArmFocus ? '#10b981' : '#e2e8f0', isArmFocus);
+      drawLimb(pose.elbow, pose.hand, 12, isArmFocus ? '#34d399' : '#f1f5f9', isArmFocus);
+
+      // Joints
+      drawJoint(pose.shoulder, 6, '#0f172a');
+      drawJoint(pose.hip, 6, '#0f172a');
+      drawJoint(pose.knee, 5, '#0f172a');
+      drawJoint(pose.elbow, 5, '#0f172a');
+      drawJoint(pose.hand, 6, '#fbbf24');
+
+      // 8. Draw Anatomical Muscle Map Miniature on Right Side of Canvas (x = 585..735)
+      drawAnatomicalMap(pose.activeZone, p);
+
+      // Bottom Caption inside Canvas
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '500 11px Inter, sans-serif';
+      ctx.fillText(`⚓ ${pose.anchorLabel}`, 18, 372);
+    }
+
+    function drawAnatomicalMap(activeZone, p) {
+      const boxX = 595;
+      const boxY = 105;
+      const boxW = 148;
+      const boxH = 218;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = 'rgba(71, 85, 105, 0.7)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '700 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('MAPA MUSCULAR ACTIVO', boxX + boxW / 2, boxY + 18);
+
+      const cx = boxX + boxW / 2;
+      const glowAlpha = (0.45 + 0.5 * p).toFixed(2);
+      const activeFill = `rgba(16, 185, 129, ${glowAlpha})`;
+      const baseFill = '#334155';
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(cx, boxY + 40, 9, 0, Math.PI * 2);
+      ctx.fillStyle = baseFill;
+      ctx.fill();
+
+      // Shoulders
+      ctx.fillStyle = (activeZone === 'shoulders' || activeZone === 'chest' || activeZone === 'back') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 28, boxY + 52, 14, 16, 5);
+      ctx.roundRect(cx + 14, boxY + 52, 14, 16, 5);
+      ctx.fill();
+
+      // Chest / Back Torso
+      ctx.fillStyle = (activeZone === 'chest' || activeZone === 'back') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 16, boxY + 52, 32, 30, 6);
+      ctx.fill();
+
+      // Core / Abs
+      ctx.fillStyle = (activeZone === 'core' || activeZone === 'quads' || activeZone === 'glutes') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 13, boxY + 84, 26, 26, 4);
+      ctx.fill();
+
+      // Arms
+      ctx.fillStyle = (activeZone === 'arms' || activeZone === 'chest' || activeZone === 'back') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 30, boxY + 70, 10, 36, 4);
+      ctx.roundRect(cx + 20, boxY + 70, 10, 36, 4);
+      ctx.fill();
+
+      // Glutes / Pelvis
+      ctx.fillStyle = (activeZone === 'glutes' || activeZone === 'quads') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 16, boxY + 112, 32, 18, 5);
+      ctx.fill();
+
+      // Quads / Hamstrings
+      ctx.fillStyle = (activeZone === 'quads' || activeZone === 'glutes') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 16, boxY + 132, 13, 38, 5);
+      ctx.roundRect(cx + 3, boxY + 132, 13, 38, 5);
+      ctx.fill();
+
+      // Calves
+      ctx.fillStyle = (activeZone === 'glutes' || activeZone === 'quads') ? activeFill : baseFill;
+      ctx.beginPath();
+      ctx.roundRect(cx - 14, boxY + 172, 10, 30, 4);
+      ctx.roundRect(cx + 4, boxY + 172, 10, 30, 4);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Update HUD metrics based on contraction `p` (0..1)
+    function updateHudMetrics(p, phaseName, phaseColor) {
+      const phaseEl = document.getElementById('hud-phase-name');
+      const barEl = document.getElementById('hud-phase-bar');
+      phaseEl.textContent = phaseName;
+      phaseEl.style.color = phaseColor;
+      barEl.style.width = `${Math.round(p * 100)}%`;
+      barEl.style.backgroundColor = phaseColor;
+
+      // Calculate total instantaneous resistance in lbs from selected bands
+      const activeBands = state.selectedBands.length > 0
+        ? state.selectedBands.map(id => BAND_CATALOG[id]).filter(Boolean)
+        : [BAND_CATALOG.cf_40_90];
+
+      let minSum = 0;
+      let maxSum = 0;
+      activeBands.forEach(b => {
+        minSum += b.minLb;
+        maxSum += b.maxLb;
+      });
+
+      const currentLb = Math.round(lerp(minSum, maxSum, p));
+      const currentKg = (currentLb * 0.453592).toFixed(1);
+
+      document.getElementById('hud-tension-value').innerHTML =
+        `${currentLb} lb <span class="text-xs text-slate-400 font-normal">(${currentKg} kg)</span>`;
+      document.getElementById('hud-band-summary').textContent =
+        activeBands.map(b => b.label).join(' + ');
+
+      if (state.manualProgress === null) {
+        document.getElementById('rom-slider').value = Math.round(p * 100);
+        document.getElementById('rom-pct-label').textContent = `${Math.round(p * 100)}%`;
+      }
+    }
+
+    let lastTimestamp = performance.now();
+    function animationLoop(now) {
+      const dt = Math.min(0.1, (now - lastTimestamp) / 1000);
+      lastTimestamp = now;
+
+      let p = 0;
+      let phaseName = '';
+      let phaseColor = '#34d399';
+
+      if (state.manualProgress !== null) {
+        p = state.manualProgress;
+        phaseName = `INSPECCIÓN MANUAL (${Math.round(p * 100)}% del recorrido)`;
+        phaseColor = '#fbbf24';
+      } else {
+        if (state.animPlaying) {
+          state.cycleTime = (state.cycleTime + dt * state.animSpeed) % 5.0;
+        }
+        const res = getContractionFromCycle(state.cycleTime);
+        p = res.p;
+        phaseName = res.phaseName;
+        phaseColor = res.phaseColor;
+      }
+
+      drawBiomechFrame(p);
+      updateHudMetrics(p, phaseName, phaseColor);
+
+      requestAnimationFrame(animationLoop);
+    }
+
+    // =========================================================================
+    // 7. TIMERS & INTERACTIVE CONTROLS WIRING
+    // =========================================================================
+    function formatMMSS(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startRestTimer(seconds) {
+      state.restSecondsLeft = seconds;
+      state.restRunning = true;
+      document.getElementById('rest-timer-display').textContent = formatMMSS(state.restSecondsLeft);
+    }
+
+    setInterval(() => {
+      // 1. Session 60-min timer
+      if (state.sessionRunning && state.sessionSecondsLeft > 0) {
+        state.sessionSecondsLeft--;
+        document.getElementById('session-timer-display').textContent = formatMMSS(state.sessionSecondsLeft);
+        if (state.sessionSecondsLeft === 0) {
+          state.sessionRunning = false;
+          playBeep(880, 0.4);
+          document.getElementById('btn-session-timer').textContent = 'Iniciar';
+        }
+      }
+
+      // 2. Rest timer (60s / 75s)
+      if (state.restRunning && state.restSecondsLeft > 0) {
+        state.restSecondsLeft--;
+        document.getElementById('rest-timer-display').textContent = formatMMSS(state.restSecondsLeft);
+        if (state.restSecondsLeft === 3 || state.restSecondsLeft === 2 || state.restSecondsLeft === 1) {
+          playBeep(520, 0.1);
+        } else if (state.restSecondsLeft === 0) {
+          state.restRunning = false;
+          playBeep(880, 0.35);
+        }
+      }
+
+      // 3. Finisher Interval timer (40s work / 20s rest)
+      if (state.finisherRunning && state.finisherSecondsLeft > 0) {
+        state.finisherSecondsLeft--;
+        document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
+        if (state.finisherSecondsLeft === 0) {
+          playBeep(780, 0.3);
+          if (state.finisherPhase === 'work') {
+            state.finisherPhase = 'rest';
+            state.finisherSecondsLeft = 20;
+            const badge = document.getElementById('finisher-phase-badge');
+            badge.textContent = '20s Descanso';
+            badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+          } else {
+            state.finisherPhase = 'work';
+            state.finisherSecondsLeft = 40;
+            const badge = document.getElementById('finisher-phase-badge');
+            badge.textContent = '40s Trabajo';
+            badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300';
+          }
+          document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
+        }
+      }
+    }, 1000);
+
+    // Wire Event Listeners
+    window.addEventListener('DOMContentLoaded', () => {
+      // Week buttons
+      document.querySelectorAll('.week-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentWeek = parseInt(btn.getAttribute('data-week'), 10);
+          saveProgress();
+          renderAll();
+        });
+      });
+
+      // Sound toggle
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔔' : '🔕';
+        document.getElementById('sound-label').textContent = state.soundEnabled ? 'Sonido ON' : 'Silencio';
+        if (state.soundEnabled) playBeep(660, 0.12);
+      });
+
+      // Session timer buttons
+      document.getElementById('btn-session-timer').addEventListener('click', () => {
+        state.sessionRunning = !state.sessionRunning;
+        document.getElementById('btn-session-timer').textContent = state.sessionRunning ? 'Pausar' : 'Iniciar';
+      });
+      document.getElementById('btn-session-reset').addEventListener('click', () => {
+        state.sessionRunning = false;
+        state.sessionSecondsLeft = 3600;
+        document.getElementById('session-timer-display').textContent = '60:00';
+        document.getElementById('btn-session-timer').textContent = 'Iniciar';
+      });
+
+      // Rest timer buttons
+      document.getElementById('btn-rest-60').addEventListener('click', () => startRestTimer(60));
+      document.getElementById('btn-rest-75').addEventListener('click', () => startRestTimer(75));
+      document.getElementById('btn-rest-stop').addEventListener('click', () => {
+        state.restRunning = false;
+        state.restSecondsLeft = 60;
+        document.getElementById('rest-timer-display').textContent = '01:00';
+      });
+
+      // Finisher timer buttons
+      document.getElementById('btn-finisher-toggle').addEventListener('click', () => {
+        state.finisherRunning = !state.finisherRunning;
+        document.getElementById('btn-finisher-toggle').textContent = state.finisherRunning ? 'Pausar' : 'Iniciar';
+      });
+      document.getElementById('btn-finisher-reset').addEventListener('click', () => {
+        state.finisherRunning = false;
+        state.finisherPhase = 'work';
+        state.finisherSecondsLeft = 40;
+        document.getElementById('finisher-timer-display').textContent = '00:40';
+        document.getElementById('btn-finisher-toggle').textContent = 'Iniciar';
+        const badge = document.getElementById('finisher-phase-badge');
+        badge.textContent = '40s Trabajo';
+        badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300';
+      });
+
+      // Animation controls
+      const btnAnimToggle = document.getElementById('btn-anim-toggle');
+      btnAnimToggle.addEventListener('click', () => {
+        state.manualProgress = null;
+        state.animPlaying = !state.animPlaying;
+        document.getElementById('anim-play-icon').textContent = state.animPlaying ? '⏸' : '▶';
+        document.getElementById('anim-play-text').textContent = state.animPlaying ? 'Pausar' : 'Reproducir';
+      });
+
+      const btnSlow = document.getElementById('btn-speed-slow');
+      const btnNormal = document.getElementById('btn-speed-normal');
+      btnSlow.addEventListener('click', () => {
+        state.manualProgress = null;
+        state.animPlaying = true;
+        state.animSpeed = 0.5;
+        btnSlow.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition';
+        btnNormal.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition';
+        document.getElementById('anim-play-icon').textContent = '⏸';
+        document.getElementById('anim-play-text').textContent = 'Pausar';
+      });
+      btnNormal.addEventListener('click', () => {
+        state.manualProgress = null;
+        state.animPlaying = true;
+        state.animSpeed = 1.0;
+        btnNormal.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition';
+        btnSlow.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition';
+        document.getElementById('anim-play-icon').textContent = '⏸';
+        document.getElementById('anim-play-text').textContent = 'Pausar';
+      });
+
+      // ROM Slider
+      const romSlider = document.getElementById('rom-slider');
+      romSlider.addEventListener('input', () => {
+        const val = parseInt(romSlider.value, 10);
+        state.manualProgress = val / 100;
+        state.animPlaying = false;
+        document.getElementById('rom-pct-label').textContent = `${val}%`;
+        document.getElementById('anim-play-icon').textContent = '▶';
+        document.getElementById('anim-play-text').textContent = 'Reproducir';
+      });
+
+      // Band Combinator Chips
+      document.querySelectorAll('[data-band-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bandId = btn.getAttribute('data-band-id');
+          const idx = state.selectedBands.indexOf(bandId);
+          if (idx >= 0) {
+            if (state.selectedBands.length > 1) {
+              state.selectedBands.splice(idx, 1);
+            }
+          } else {
+            state.selectedBands.push(bandId);
+          }
+          renderVisualizerDetails();
+        });
+      });
+
+      document.getElementById('btn-reset-bands').addEventListener('click', () => {
+        syncSelectedBandsToExercise();
+        renderVisualizerDetails();
+      });
+
+      syncSelectedBandsToExercise();
+      renderAll();
+      requestAnimationFrame(animationLoop);
+    });
+  </script>
+</body>
+</html>
