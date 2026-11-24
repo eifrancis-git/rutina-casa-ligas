@@ -611,8 +611,29 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #0f172a;
+      background: radial-gradient(ellipse at top left, #183449 0%, #0f172a 48rem);
+      background-attachment: fixed;
       color: #f8fafc;
+    }
+    :focus-visible {
+      outline: 2px solid #34d399;
+      outline-offset: 3px;
+    }
+    summary::-webkit-details-marker {
+      display: none;
+    }
+    details[open] .details-chevron {
+      transform: rotate(45deg);
+    }
+    .exercise-card {
+      transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    }
+    .exercise-card:hover {
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
     }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
@@ -665,9 +686,9 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         </div>
 
         <!-- Exercise Editor Modal Trigger -->
-        <button id="btn-open-editor" class="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-xs font-bold text-emerald-300 flex items-center gap-1.5 transition" title="Editar o agregar ejercicios visualmente">
-          <span>✏️</span>
-          <span>Editar Ejercicios</span>
+        <button id="btn-open-editor" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition" title="Editar o agregar ejercicios visualmente">
+          <span>⚙️</span>
+          <span>Gestionar rutina</span>
         </button>
 
         <!-- Sound Toggle -->
@@ -731,9 +752,12 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             <span id="day-badge" class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1">Lunes • Día 1</span>
             <h2 id="day-title" class="text-lg font-extrabold text-white">Pierna A: Cuádriceps, Aductores y Core Antiflexión</h2>
           </div>
-          <div class="text-right shrink-0">
+          <div class="text-right shrink-0 min-w-28">
             <div class="text-xs text-slate-400">Progreso del Día</div>
             <div id="day-progress-text" class="text-sm font-bold text-emerald-400">0 / 6 completados</div>
+            <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-900" role="progressbar" aria-label="Progreso de ejercicios del día" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+              <div id="day-progress-bar" class="h-full rounded-full bg-emerald-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
           </div>
         </div>
         <p id="day-focus" class="text-xs text-slate-300 leading-relaxed mb-3">Priorizamos patrones de rodilla dominantes sin impacto pliométrico, fortaleciendo el vasto interno (TKE) para dar máxima estabilidad a tus rodillas.</p>
@@ -759,40 +783,23 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         </div>
 
         <!-- Warmup collapsible/box -->
-        <div class="mt-3 pt-3 border-t border-slate-700/70 flex items-start gap-2 text-xs text-slate-300">
-          <span class="text-amber-400 font-bold shrink-0">🔥 Calentamiento (8 min):</span>
-          <span id="day-warmup">2 rondas de 10 sentadillas suaves tocando una silla detrás, 10 aperturas de cadera en suelo y 30 s de plancha apoyando manos en silla.</span>
-        </div>
+        <details class="mt-3 border-t border-slate-700/70 pt-3 text-xs text-slate-300">
+          <summary class="flex cursor-pointer items-center justify-between gap-2 font-semibold text-amber-300">
+            <span>🔥 Calentamiento · 8 min</span>
+            <span class="details-chevron text-base transition-transform">＋</span>
+          </summary>
+          <p id="day-warmup" class="mt-2 leading-relaxed">2 rondas de 10 sentadillas suaves tocando una silla detrás, 10 aperturas de cadera en suelo y 30 s de plancha apoyando manos en silla.</p>
+        </details>
       </div>
 
       <!-- Week Adaptation Banner -->
-      <div id="week-banner" class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-3.5 py-2.5 text-xs flex items-center justify-between gap-2">
-        <div>
+      <details id="week-banner" class="rounded-xl border border-emerald-500/30 bg-emerald-950/40 px-3.5 py-2.5 text-xs">
+        <summary class="flex cursor-pointer items-center justify-between gap-2">
           <span id="week-title" class="font-bold text-emerald-300">Semana 1 (Readaptación Neuromuscular • RIR 3):</span>
-          <span id="week-desc" class="text-slate-300 ml-1">Realiza 3 series en todos los ejercicios dejando 3 repeticiones en reserva para readaptar tendones sin agujetas severas.</span>
-        </div>
-      </div>
-
-      <!-- Prominent Exercise Management Bar -->
-      <div class="bg-amber-500/15 border-2 border-amber-400/60 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 shadow-md">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🛠️</span>
-          <div>
-            <div class="text-xs font-extrabold text-amber-300 uppercase tracking-wide">Gestor de Rutina en Vivo</div>
-            <div class="text-[11px] text-slate-300">Toca «✏️ Editar ejercicio» en cualquier tarjeta o agrega uno nuevo</div>
-          </div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button id="btn-bar-edit-ex" type="button" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center justify-center gap-1">
-            <span>✏️</span>
-            <span>Editar Ejercicio</span>
-          </button>
-          <button id="btn-bar-add-ex" type="button" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow transition flex items-center justify-center gap-1">
-            <span>➕</span>
-            <span>Nuevo Ejercicio</span>
-          </button>
-        </div>
-      </div>
+          <span class="details-chevron text-base text-emerald-300 transition-transform">＋</span>
+        </summary>
+        <p id="week-desc" class="mt-2 leading-relaxed text-slate-300">Realiza 3 series en todos los ejercicios dejando 3 repeticiones en reserva para readaptar tendones sin agujetas severas.</p>
+      </details>
 
       <!-- Exercise Cards List -->
       <div class="flex flex-col gap-2.5" id="exercise-list-container"><div class="rounded-2xl p-3.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 transition cursor-pointer">
@@ -813,10 +820,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="0" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-900 text-slate-400">
                 Ver animación
               </span>
@@ -858,10 +861,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="1" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-900 text-slate-400">
                 Ver animación
               </span>
@@ -903,10 +902,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="2" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300">
                 ▶ Visualizando
               </span>
@@ -944,10 +939,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="3" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-900 text-slate-400">
                 Ver animación
               </span>
@@ -985,10 +976,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="4" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-900 text-slate-400">
                 Ver animación
               </span>
@@ -1026,10 +1013,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="5" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-900 text-slate-400">
                 Ver animación
               </span>
@@ -1078,7 +1061,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
     <!-- RIGHT COLUMN: Interactive Biomechanical Exercise Visualizer (7 cols on lg) -->
     <section class="lg:col-span-7 flex flex-col gap-4">
-      <div class="bg-slate-800/95 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl sticky top-28">
+      <div class="bg-slate-800/95 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl">
         
         <!-- Active Exercise Title & Anchor Badge -->
         <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -1089,10 +1072,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <h2 id="viz-ex-name" class="text-xl font-extrabold text-white">Prensa Unilateral de Pierna en Suelo</h2>
-              <button id="btn-edit-current-ex" type="button" class="px-2.5 py-1 rounded-lg bg-slate-700/80 hover:bg-emerald-600 text-slate-200 hover:text-white text-xs font-semibold transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Modificar</span>
-              </button>
             </div>
           </div>
 
@@ -1167,22 +1146,26 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         </div>
 
         <!-- Interactive Equipment Combinator (Tus Ligas) -->
-        <div class="mt-4 bg-slate-900/70 border border-slate-800 rounded-xl p-3.5">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <details class="mt-4 rounded-xl border border-slate-800 bg-slate-900/70">
+          <summary class="flex cursor-pointer items-center justify-between gap-3 p-3.5">
             <div>
               <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">
-                🎛️ Simulador de Carga con tus Ligas (Haz clic para combinar)
+                🎛️ Ajustar la carga de las ligas
               </h3>
               <p class="text-[11px] text-slate-400">
                 Recomendado para este ejercicio: <strong id="viz-rec-band" class="text-emerald-400">CrossFit 35–50 lb (o Tubular 50 lb)</strong>
               </p>
             </div>
-            <button id="btn-reset-bands" class="text-[11px] text-emerald-400 hover:text-emerald-300 underline font-medium">
-              Restaurar liga sugerida
-            </button>
-          </div>
+            <span class="details-chevron text-base text-emerald-300 transition-transform">＋</span>
+          </summary>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-3 px-3.5 pb-3.5">
+            <div class="flex justify-end">
+              <button id="btn-reset-bands" class="text-[11px] text-emerald-400 hover:text-emerald-300 underline font-medium">
+                Restaurar liga sugerida
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <!-- Tubular Bands -->
             <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80">
               <div class="text-[11px] font-semibold text-slate-400 mb-1.5 flex justify-between">
@@ -1211,8 +1194,9 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
                 <button data-band-type="crossfit" data-band-id="cf_50_125" class="band-chip px-2.5 py-1 rounded-md text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500">50–125 lb</button>
               </div>
             </div>
+            </div>
           </div>
-        </div>
+        </details>
 
         <!-- Step-by-Step Coaching Cues & Joint Safety -->
         <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1246,7 +1230,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
   </main>
 
   <!-- IN-PAGE EXERCISE EDITOR MODAL -->
-  <div id="editor-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm items-center justify-center p-4 overflow-y-auto flex">
+  <div id="editor-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editor-modal-title">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 shadow-2xl my-8">
       <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
@@ -1320,7 +1304,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-slate-300 font-semibold mb-1" for="edit-ex-sets">Series Base</label>
-            <input id="edit-ex-sets" type="number" min="1" max="8" required="" class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-white">
+            <input id="edit-ex-sets" type="number" min="2" max="8" required="" class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-white">
           </div>
           <div>
             <label class="block text-slate-300 font-semibold mb-1" for="edit-ex-reps">Repeticiones / Tiempo</label>
@@ -2194,7 +2178,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     const WEEK_CONFIG = {
       1: {
         title: 'Semana 1 (Readaptación Neuromuscular • RIR 3):',
-        desc: 'Realiza 3 series en todos los ejercicios dejando 3 repeticiones en reserva para readaptar tendones sin agujetas severas.',
+        desc: 'Realiza una serie menos que la indicada (mínimo 2), dejando 3 repeticiones en reserva para readaptar tendones sin agujetas severas.',
         setsModifier: -1
       },
       2: {
@@ -2236,7 +2220,10 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       restRunning: false,
       finisherSecondsLeft: 40,
       finisherPhase: 'work', // 'work' (40s) or 'rest' (20s)
-      finisherRunning: false
+      finisherRunning: false,
+      finisherDayId: null,
+      finisherConfig: null,
+      finisherIntervalsRemaining: 0
     };
 
     // Load saved progress safely
@@ -2297,8 +2284,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     }
 
     function getEffectiveSets(ex) {
-      const mod = WEEK_CONFIG[state.currentWeek].setsModifier;
-      return Math.max(2, Math.min(5, ex.baseSets + (state.currentWeek === 1 ? -1 : state.currentWeek === 4 ? 1 : 0)));
+      return Math.max(2, Math.min(5, ex.baseSets + WEEK_CONFIG[state.currentWeek].setsModifier));
     }
 
     function renderDayTabs() {
@@ -2379,8 +2365,8 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
         const card = document.createElement('div');
         card.className = isSelected
-          ? 'rounded-2xl p-3.5 bg-slate-800 border-2 border-emerald-500 shadow-lg transition cursor-pointer'
-          : 'rounded-2xl p-3.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 transition cursor-pointer';
+          ? 'exercise-card rounded-2xl p-3.5 bg-slate-800 border-2 border-emerald-500 shadow-lg cursor-pointer'
+          : 'exercise-card rounded-2xl p-3.5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 cursor-pointer';
 
         // Build set buttons HTML
         let setsButtonsHtml = '';
@@ -2418,10 +2404,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
               </div>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <button type="button" data-edit-idx="${idx}" class="card-edit-ex-btn px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1">
-                <span>✏️</span>
-                <span>Editar ejercicio</span>
-              </button>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                 isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-400'
               }">
@@ -2438,17 +2420,6 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         `;
 
         card.addEventListener('click', (e) => {
-          const editBtn = e.target.closest('.card-edit-ex-btn');
-          if (editBtn) {
-            e.stopPropagation();
-            state.currentExIndex = idx;
-            syncSelectedBandsToExercise();
-            renderAll();
-            if (typeof window.openWorkoutEditorModal === 'function') {
-              window.openWorkoutEditorModal('edit');
-            }
-            return;
-          }
           const setBtn = e.target.closest('.set-check-btn');
           if (setBtn) {
             e.stopPropagation();
@@ -2476,6 +2447,13 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
       document.getElementById('day-progress-text').textContent =
         `${completedExercises} / ${day.exercises.length} completados`;
+      const progressBar = document.getElementById('day-progress-bar');
+      const progress = day.exercises.length
+        ? Math.round((completedExercises / day.exercises.length) * 100)
+        : 0;
+      progressBar.style.width = `${progress}%`;
+      progressBar.parentElement.setAttribute('aria-valuemax', day.exercises.length);
+      progressBar.parentElement.setAttribute('aria-valuenow', completedExercises);
     }
 
     function syncSelectedBandsToExercise() {
@@ -2528,6 +2506,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       renderWeekControls();
       renderExerciseList();
       renderVisualizerDetails();
+      configureFinisherTimer(getCurrentDay());
     }
 
     // =========================================================================
@@ -3368,7 +3347,8 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
     function drawBiomechFrame(p) {
       const ex = getCurrentExercise();
-      const pose = getPoseForPattern(ex.animType, p);
+      const reverseContraction = ['squat_front', 'box_squat', 'squat_sumo', 'split_squat'].includes(ex.animType);
+      const pose = getPoseForPattern(ex.animType, reverseContraction ? 1 - p : p);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3672,6 +3652,99 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       document.getElementById('rest-timer-display').textContent = formatMMSS(state.restSecondsLeft);
     }
 
+    function getFinisherConfig(finisherText) {
+      const intervalMatch = finisherText.match(/(\d+)\s*s\s*trabajo\s*\/\s*(\d+)\s*s\s*descanso/i);
+      if (intervalMatch) {
+        const roundsMatch = finisherText.match(/(\d+)\s*rondas?/i);
+        const exerciseCount = [...finisherText.matchAll(/\(\d+\)\s+[A-ZÁÉÍÓÚ]/g)].length || 1;
+        const rounds = roundsMatch ? Number(roundsMatch[1]) : 1;
+        return {
+          mode: 'interval',
+          workSeconds: Number(intervalMatch[1]),
+          restSeconds: Number(intervalMatch[2]),
+          intervals: rounds * exerciseCount
+        };
+      }
+
+      const durationMatch = finisherText.match(/(\d+)\s*min(?:utos?)?/i);
+      if (durationMatch) {
+        return { mode: 'continuous', totalSeconds: Number(durationMatch[1]) * 60 };
+      }
+
+      return { mode: 'none' };
+    }
+
+    function updateFinisherBadge(text, phase = 'work') {
+      const badge = document.getElementById('finisher-phase-badge');
+      badge.textContent = text;
+      badge.className = phase === 'rest'
+        ? 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300'
+        : 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300';
+    }
+
+    function resetFinisherTimer() {
+      const config = state.finisherConfig;
+      state.finisherRunning = false;
+      state.finisherPhase = 'work';
+      state.finisherIntervalsRemaining = config?.mode === 'interval' ? config.intervals : 0;
+      state.finisherSecondsLeft = config?.mode === 'interval'
+        ? config.workSeconds
+        : config?.mode === 'continuous' ? config.totalSeconds : 0;
+      document.getElementById('finisher-timer-display').textContent =
+        config?.mode === 'none' ? '--:--' : formatMMSS(state.finisherSecondsLeft);
+      document.getElementById('btn-finisher-toggle').textContent = config?.mode === 'none' ? 'Sin tiempo' : 'Iniciar';
+      if (config?.mode === 'interval') {
+        updateFinisherBadge(`${config.workSeconds}s Trabajo`);
+      } else if (config?.mode === 'continuous') {
+        updateFinisherBadge('Continuo');
+      } else {
+        updateFinisherBadge('Recuperación');
+      }
+    }
+
+    function configureFinisherTimer(day) {
+      if (state.finisherDayId === day.id) return;
+      state.finisherDayId = day.id;
+      state.finisherConfig = getFinisherConfig(day.finisher);
+      const hasTimer = state.finisherConfig.mode !== 'none';
+      document.getElementById('btn-finisher-toggle').disabled = !hasTimer;
+      document.getElementById('btn-finisher-reset').disabled = !hasTimer;
+      resetFinisherTimer();
+    }
+
+    function tickFinisherTimer() {
+      if (!state.finisherRunning || state.finisherSecondsLeft <= 0) return;
+      state.finisherSecondsLeft--;
+      document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
+      if (state.finisherSecondsLeft !== 0) return;
+
+      playBeep(780, 0.3);
+      if (state.finisherConfig.mode === 'continuous') {
+        state.finisherRunning = false;
+        updateFinisherBadge('Completado');
+        document.getElementById('btn-finisher-toggle').textContent = 'Iniciar';
+        return;
+      }
+
+      if (state.finisherPhase === 'work') {
+        state.finisherIntervalsRemaining--;
+        if (state.finisherIntervalsRemaining === 0) {
+          state.finisherRunning = false;
+          updateFinisherBadge('Completado');
+          document.getElementById('btn-finisher-toggle').textContent = 'Iniciar';
+          return;
+        }
+        state.finisherPhase = 'rest';
+        state.finisherSecondsLeft = state.finisherConfig.restSeconds;
+        updateFinisherBadge(`${state.finisherConfig.restSeconds}s Descanso`, 'rest');
+      } else {
+        state.finisherPhase = 'work';
+        state.finisherSecondsLeft = state.finisherConfig.workSeconds;
+        updateFinisherBadge(`${state.finisherConfig.workSeconds}s Trabajo`);
+      }
+      document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
+    }
+
     setInterval(() => {
       // 1. Session 60-min timer
       if (state.sessionRunning && state.sessionSecondsLeft > 0) {
@@ -3696,28 +3769,8 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         }
       }
 
-      // 3. Finisher Interval timer (40s work / 20s rest)
-      if (state.finisherRunning && state.finisherSecondsLeft > 0) {
-        state.finisherSecondsLeft--;
-        document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
-        if (state.finisherSecondsLeft === 0) {
-          playBeep(780, 0.3);
-          if (state.finisherPhase === 'work') {
-            state.finisherPhase = 'rest';
-            state.finisherSecondsLeft = 20;
-            const badge = document.getElementById('finisher-phase-badge');
-            badge.textContent = '20s Descanso';
-            badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
-          } else {
-            state.finisherPhase = 'work';
-            state.finisherSecondsLeft = 40;
-            const badge = document.getElementById('finisher-phase-badge');
-            badge.textContent = '40s Trabajo';
-            badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300';
-          }
-          document.getElementById('finisher-timer-display').textContent = formatMMSS(state.finisherSecondsLeft);
-        }
-      }
+      // 3. Finisher timer
+      tickFinisherTimer();
     }, 1000);
 
     // Wire Event Listeners
@@ -3762,18 +3815,13 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
       // Finisher timer buttons
       document.getElementById('btn-finisher-toggle').addEventListener('click', () => {
+        if (state.finisherConfig.mode === 'none') return;
+        if (!state.finisherRunning && state.finisherSecondsLeft === 0) resetFinisherTimer();
         state.finisherRunning = !state.finisherRunning;
         document.getElementById('btn-finisher-toggle').textContent = state.finisherRunning ? 'Pausar' : 'Iniciar';
       });
       document.getElementById('btn-finisher-reset').addEventListener('click', () => {
-        state.finisherRunning = false;
-        state.finisherPhase = 'work';
-        state.finisherSecondsLeft = 40;
-        document.getElementById('finisher-timer-display').textContent = '00:40';
-        document.getElementById('btn-finisher-toggle').textContent = 'Iniciar';
-        const badge = document.getElementById('finisher-phase-badge');
-        badge.textContent = '40s Trabajo';
-        badge.className = 'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300';
+        resetFinisherTimer();
       });
 
       // Animation controls
@@ -3842,6 +3890,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       let editorMode = 'edit'; // 'edit' or 'new'
       const editorModal = document.getElementById('editor-modal');
       const statusMsg = document.getElementById('editor-status-msg');
+      let editorReturnFocus = null;
 
       function populateEditorForm(mode) {
         editorMode = mode;
@@ -3886,24 +3935,32 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       }
 
       function openEditorModal(mode = 'edit') {
+        editorReturnFocus = document.activeElement;
         populateEditorForm(mode);
         editorModal.classList.remove('hidden');
         editorModal.classList.add('flex');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('edit-ex-name').focus();
       }
       window.openWorkoutEditorModal = openEditorModal;
 
       function closeEditorModal() {
         editorModal.classList.add('hidden');
         editorModal.classList.remove('flex');
+        if (editorReturnFocus instanceof HTMLElement) editorReturnFocus.focus();
       }
 
       document.getElementById('btn-open-editor').addEventListener('click', () => openEditorModal('edit'));
-      document.getElementById('btn-edit-current-ex').addEventListener('click', () => openEditorModal('edit'));
-      document.getElementById('btn-bar-edit-ex').addEventListener('click', () => openEditorModal('edit'));
-      document.getElementById('btn-bar-add-ex').addEventListener('click', () => openEditorModal('new'));
       document.getElementById('btn-close-editor').addEventListener('click', closeEditorModal);
       document.getElementById('btn-cancel-editor').addEventListener('click', closeEditorModal);
+      editorModal.addEventListener('click', (event) => {
+        if (event.target === editorModal) closeEditorModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !editorModal.classList.contains('hidden')) {
+          closeEditorModal();
+        }
+      });
       document.getElementById('btn-mode-edit').addEventListener('click', () => populateEditorForm('edit'));
       document.getElementById('btn-mode-new').addEventListener('click', () => populateEditorForm('new'));
 
