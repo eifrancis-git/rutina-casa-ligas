@@ -611,12 +611,11 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(ellipse at top left, #183449 0%, #0f172a 48rem);
-      background-attachment: fixed;
-      color: #f8fafc;
+      background: #101512;
+      color: #e4e9e5;
     }
     :focus-visible {
-      outline: 2px solid #34d399;
+      outline: 2px solid #a9c9b3;
       outline-offset: 3px;
     }
     summary::-webkit-details-marker {
@@ -629,11 +628,161 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
       transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
     }
     .exercise-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
     button:disabled {
       cursor: not-allowed;
       opacity: 0.45;
+    }
+    header {
+      background: rgba(16, 21, 18, 0.96) !important;
+      border-color: #29312d !important;
+    }
+    main {
+      gap: 1.25rem;
+    }
+    [class~="bg-slate-800"] {
+      background-color: #1a211d !important;
+    }
+    [class~="bg-slate-800/60"] {
+      background-color: rgba(26, 33, 29, 0.6) !important;
+    }
+    [class~="bg-slate-800/80"] {
+      background-color: rgba(26, 33, 29, 0.8) !important;
+    }
+    [class~="bg-slate-800/90"] {
+      background-color: rgba(26, 33, 29, 0.9) !important;
+    }
+    [class~="bg-slate-800/95"] {
+      background-color: rgba(26, 33, 29, 0.95) !important;
+    }
+    [class~="bg-slate-900"] {
+      background-color: #141a17 !important;
+    }
+    [class~="bg-slate-900/70"] {
+      background-color: rgba(20, 26, 23, 0.7) !important;
+    }
+    [class~="bg-slate-900/80"] {
+      background-color: rgba(20, 26, 23, 0.8) !important;
+    }
+    [class~="bg-slate-900/90"] {
+      background-color: rgba(20, 26, 23, 0.9) !important;
+    }
+    [class~="bg-slate-900/95"] {
+      background-color: rgba(20, 26, 23, 0.95) !important;
+    }
+    [class~="bg-slate-950"] {
+      background-color: #101512 !important;
+    }
+    [class~="bg-slate-950/25"] {
+      background-color: rgba(16, 21, 18, 0.25) !important;
+    }
+    [class~="bg-slate-950/70"] {
+      background-color: rgba(16, 21, 18, 0.7) !important;
+    }
+    [class~="bg-slate-950/80"] {
+      background-color: rgba(16, 21, 18, 0.8) !important;
+    }
+    [class~="bg-emerald-950"] {
+      background-color: #18221c !important;
+    }
+    [class~="bg-emerald-950/40"] {
+      background-color: rgba(24, 34, 28, 0.4) !important;
+    }
+    [class~="bg-emerald-950/60"] {
+      background-color: rgba(24, 34, 28, 0.6) !important;
+    }
+    [class*="border-slate-"] {
+      border-color: #2b3530 !important;
+    }
+    [class*="text-emerald-"] {
+      color: #a8c8b2 !important;
+    }
+    [class*="text-amber-"] {
+      color: #c8b98f !important;
+    }
+    [class*="text-sky-"] {
+      color: #a9c1c0 !important;
+    }
+    [class*="text-purple-"] {
+      color: #b7adbf !important;
+    }
+    [class*="text-rose-"] {
+      color: #cda3a0 !important;
+    }
+    button {
+      border-radius: 0.6rem !important;
+      box-shadow: none !important;
+      transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+    }
+    button.bg-emerald-500,
+    button.bg-emerald-600,
+    button.bg-sky-600 {
+      background-color: #b8d0bf !important;
+      border-color: transparent !important;
+      color: #172019 !important;
+    }
+    button.bg-emerald-500:hover,
+    button.bg-emerald-600:hover,
+    button.bg-sky-600:hover {
+      background-color: #c9dccd !important;
+    }
+    #day-tabs-container button {
+      background: transparent !important;
+      border-color: transparent !important;
+      border-radius: 0.6rem !important;
+      box-shadow: none !important;
+      color: #aeb8b1 !important;
+    }
+    #day-tabs-container button:hover {
+      background: #1a211d !important;
+      color: #e4e9e5 !important;
+    }
+    #day-tabs-container button.bg-emerald-500 {
+      background: #b8d0bf !important;
+      color: #172019 !important;
+    }
+    #day-tabs-container button.bg-emerald-500 span:last-child {
+      background: #d3e1d5 !important;
+      color: #344b3b !important;
+    }
+    .week-btn {
+      border-radius: 0.5rem !important;
+    }
+    .week-btn.bg-emerald-600 {
+      background: #b8d0bf !important;
+      color: #172019 !important;
+    }
+    .day-overview,
+    .visualizer-panel,
+    .finisher-panel {
+      background: #171e1a !important;
+      border-color: #2b3530 !important;
+      border-radius: 1rem !important;
+      box-shadow: none !important;
+    }
+    #week-banner {
+      background: #151c18 !important;
+      border-color: #29352e !important;
+    }
+    #exercise-list-container > div {
+      background: #151c18 !important;
+      border-color: #29332e !important;
+      border-radius: 0.9rem !important;
+      box-shadow: none !important;
+    }
+    #exercise-list-container > div.border-emerald-500 {
+      background: #1a241d !important;
+      border-color: #829e89 !important;
+    }
+    #exercise-list-container .set-check-btn {
+      background: transparent !important;
+      border-color: #37423b !important;
+      color: #d1d8d2 !important;
+    }
+    #exercise-list-container .set-check-btn.bg-emerald-500 {
+      background: #b8d0bf !important;
+      color: #172019 !important;
     }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
@@ -746,7 +895,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
     <!-- LEFT COLUMN: Day Overview & Exercise List (5 cols on lg) -->
     <section class="lg:col-span-5 flex flex-col gap-4">
       <!-- Day Summary Banner -->
-      <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
+      <div class="day-overview bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
         <div class="flex items-start justify-between gap-2 mb-2">
           <div>
             <span id="day-badge" class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1">Lunes • Día 1</span>
@@ -1035,7 +1184,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
         </div></div>
 
       <!-- Metabolic Finisher Card -->
-      <div class="bg-slate-800/90 border border-sky-500/30 rounded-2xl p-4 shadow-lg">
+      <div class="finisher-panel bg-slate-800/90 border border-sky-500/30 rounded-2xl p-4 shadow-lg">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 text-[11px] font-bold uppercase rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
@@ -1061,7 +1210,7 @@ url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMExce
 
     <!-- RIGHT COLUMN: Interactive Biomechanical Exercise Visualizer (7 cols on lg) -->
     <section class="lg:col-span-7 flex flex-col gap-4">
-      <div class="bg-slate-800/95 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl">
+      <div class="visualizer-panel bg-slate-800/95 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl">
         
         <!-- Active Exercise Title & Anchor Badge -->
         <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
